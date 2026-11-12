@@ -3,7 +3,7 @@
 **Goal:** The go-to quoting app for up-and-coming painters. Enter the job details, get an
 itemized price, send it to the customer. Free to start, paid plan later.
 
-**Where we are now:** Phase 1 is built, plus the Residential/Commercial job types. **Next: put it online (Phase 2, step 1).**
+**Where we are now:** Phase 1 is built, plus the Residential/Commercial job types. **Next: owner merges the pull request, then we turn on GitHub Pages.**
 
 Legend: ✅ done · 🔄 in progress · ⬜ not started
 
@@ -29,11 +29,12 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ✅ Commercial → Office, Retail, Restaurant, Warehouse or Other (owner to confirm this list)
 - ✅ Commercial room presets (Office, Conference Room, Open Floor, Lobby, Restroom, Break Room, Hallway)
 - ✅ Property type shown on the quote, email text and quote list; can be changed while editing
+- ⬜ Quick estimate from the home's total square footage (no measuring; cheap alternative to room scanning)
 - ⬜ Decide if property type should change pricing (e.g. condo building rules, commercial rates or after-hours work)
 
 ## Phase 2 — Get it online and in painters' hands ⬜
 
-- ⬜ Merge the code into `main` (open a pull request)
+- 🔄 Merge the code into `main` (pull request opened, owner to merge)
 - ⬜ Turn on GitHub Pages so the app has a public link
 - ⬜ Install it on your own phone and quote a real (or pretend) job
 - ⬜ Check the default prices against real local numbers
@@ -54,6 +55,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ⬜ Accounts and cloud sync (quotes on any device)
 - ⬜ Customer "Accept quote" link with e-signature
 - ⬜ Deposit payments through Stripe
+- ⬜ Room scanning with the iPhone's LiDAR sensor (needs a native iPhone app; Pro models only) — premium feature
 - ⬜ Paid plan (e.g. free for 3 quotes/month, monthly fee for unlimited + logo)
 - ⬜ Simple landing page explaining the app
 
@@ -77,6 +79,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 | 2026-11-12 | No AI inside the app for now | Pricing is math; keeps running costs at $0 |
 | 2026-11-12 | App lives in `bidbrush/` folder | Keeps the GitHub profile README separate |
 | 2026-11-13 | Quotes start by picking Residential (House / Townhouse / Condo) or Commercial | Owner request; tailors room presets and shows the property on the quote |
+| 2026-11-13 | Room scanning postponed to the native-app stage | Works well only on Pro iPhones in a native app (App Store fees, much more work); AI photo guesses are too rough for pricing |
 | 2026-11-12 | Name: **BidBrush** | Says what it does (bids) and who it's for (painters); short and works as a social handle |
 
 ## Log
@@ -89,3 +92,5 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - **2026-11-12** — Owner picked **BidBrush**. Renamed the app, files and folder (`bidbrush/`).
 - **2026-11-13** — Added the Residential/Commercial job type step with property types,
   commercial room presets, and the property on quotes. 9 tests passing; tested on a simulated iPhone.
+- **2026-11-13** — Opened the pull request to merge into `main`. Looked into room scanning:
+  postponed to Phase 4; added a whole-home square-footage quick estimate as a cheaper idea.
