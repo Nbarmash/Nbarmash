@@ -3,7 +3,7 @@
 **Goal:** The go-to quoting app for up-and-coming painters. Enter the job details, get an
 itemized price, send it to the customer. Free to start, paid plan later.
 
-**Where we are now:** Everything is live. App: https://nbarmash.github.io/Nbarmash/coatwright/ · Landing page: https://nbarmash.github.io/Nbarmash/ (quoting, exterior/floors/cabinets, business tools, invoices, schedule, customers). **Next (owner): test on your phone, grab coatwright.com and @coatwright handles, show 5–10 painters, start posting the demo videos.**
+**Where we are now:** Live: app, invoices/schedule/customers, cabinets, landing page v1. On the working branch: professional landing page redesign, Privacy Policy & Terms, and first-run onboarding. **Next: merge so they go live; owner provides a support email, sends bidbrush.pro screenshots, creates social accounts.**
 
 Legend: ✅ done · 🔄 in progress · ⬜ not started
 
@@ -82,6 +82,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ⬜ Paid plan (e.g. free for 3 quotes/month, monthly fee for unlimited + logo)
 - ✅ Landing page redesigned to look professional (menu, trust strip, feature sections, comparison table, Starter/Pro pricing, FAQ, footer, share image)
 - ✅ Privacy Policy (`privacy.html`) and Terms of Service (`terms.html`), accurate to how the app stores data
+- ✅ First-run onboarding in the app: welcome → business info & logo → rate presets (starting out / established / premium) → first quote or sample quote, with install-to-home-screen help
 - ⬜ Add a support email to the site and legal pages (owner to provide)
 - ✅ First landing page at https://nbarmash.github.io/Nbarmash/ (root `index.html`, screenshots in `landing/`); the app stays at `/coatwright/`
 
@@ -153,3 +154,4 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - **2026-11-13** — Merged pull request #3 (invoices, schedule, customers, cabinets & add-ons, landing page, video plan). All live.
 - **2026-11-13** — Owner asked for social handles. Built the social media kit (images, bios, setup steps, first posts); owner to create the accounts.
 - **2026-11-13** — Owner wants a more professional site. bidbrush.pro is blocked from Claude's environment (owner declined a network change). Redesigned the landing page and added Privacy Policy and Terms.
+- **2026-11-13** — Added first-run onboarding (business info, rate presets, sample quote, install help). 29 tests passing; full walkthroughs pass.
