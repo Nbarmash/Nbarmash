@@ -80,7 +80,10 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ⬜ Deposit payments through Stripe
 - ⬜ Room scanning with the iPhone's LiDAR sensor (needs a native iPhone app; Pro models only) — premium feature
 - ⬜ Paid plan (e.g. free for 3 quotes/month, monthly fee for unlimited + logo)
-- ✅ Landing page at https://nbarmash.github.io/Nbarmash/ (root `index.html`, screenshots in `landing/`); the app stays at `/coatwright/`
+- ✅ Landing page redesigned to look professional (menu, trust strip, feature sections, comparison table, Starter/Pro pricing, FAQ, footer, share image)
+- ✅ Privacy Policy (`privacy.html`) and Terms of Service (`terms.html`), accurate to how the app stores data
+- ⬜ Add a support email to the site and legal pages (owner to provide)
+- ✅ First landing page at https://nbarmash.github.io/Nbarmash/ (root `index.html`, screenshots in `landing/`); the app stays at `/coatwright/`
 
 ## Phase 5 — Grow 🔄
 
@@ -115,6 +118,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 | 2026-11-13 | Exterior estimated from home size + stories (no measuring needed); epoxy priced as a per-sq-ft kit | Fast on site, consistent with the quick-estimate approach; epoxy is bought as kits, not gallons |
 | 2026-11-13 | Landing page lives at the site root; app keeps its `/coatwright/` address | Home-screen installs keep working; a future coatwright.com can point at the landing page |
 | 2026-11-13 | One dedicated Coatwright email and the same username on every platform | Keeps the brand separate from personal accounts and easy to find |
+| 2026-11-13 | Pricing shows Starter $0 now, Pro "coming soon" with no price | Honest: nothing to sell yet; signals a free core plus paid extras |
 | 2026-11-12 | Name: **BidBrush** (replaced) | Says what it does (bids) and who it's for (painters); short and works as a social handle |
 
 ## Log
@@ -148,3 +152,4 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - **2026-11-13** — Wrote the launch video plan and recorded 2 demo videos from the real app. Fixed negative money showing as "$-140".
 - **2026-11-13** — Merged pull request #3 (invoices, schedule, customers, cabinets & add-ons, landing page, video plan). All live.
 - **2026-11-13** — Owner asked for social handles. Built the social media kit (images, bios, setup steps, first posts); owner to create the accounts.
+- **2026-11-13** — Owner wants a more professional site. bidbrush.pro is blocked from Claude's environment (owner declined a network change). Redesigned the landing page and added Privacy Policy and Terms.
