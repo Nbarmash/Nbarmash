@@ -134,9 +134,18 @@ input:focus, textarea:focus { outline: 2px solid var(--brand); outline-offset: -
 .prop-chips .chip { flex: 1 1 auto; }
 .doc-to { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 
+/* Quick estimate */
+.mode-switch { margin-bottom: 12px; }
+.mode-switch button { min-height: 48px; font-size: 15px; }
+.field.sqft { margin-top: 12px; }
+.field.sqft input { font-size: 22px; font-weight: 700; min-height: 56px; }
+.hint { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: #fff7e0; font-size: 13px; }
+
 /* Room cards */
 .room-head { display: flex; align-items: center; gap: 10px; }
 .room-name { font-size: 18px; font-weight: 700; border-color: transparent; background: transparent; padding-left: 4px; }
+.room-head .room-name { flex: 1; min-width: 0; }
+.chip.toggle { white-space: nowrap; }
 .room-name:focus { border-color: var(--line); }
 .room-price { font-size: 20px; font-weight: 800; color: var(--brand); white-space: nowrap; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }

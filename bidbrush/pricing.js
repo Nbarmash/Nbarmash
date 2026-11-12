@@ -216,14 +216,75 @@
     };
   }
 
+  function newQuick() {
+    return { sqft: '', height: 8, coats: 2, condition: 'good',
+      surfaces: { walls: true, ceiling: false, trim: true, doors: false } };
+  }
+
+  // Typical room used to turn total floor area into walls, trim and doors.
+  var QUICK_PROFILE = {
+    residential: { roomSqft: 150, doors: 1, windows: 2 },
+    commercial: { roomSqft: 300, doors: 1, windows: 1 }
+  };
+
+  /**
+   * Ballpark for a whole home/space from its total floor area: treat it as
+   * N typical rooms, price one with calcRoom and scale up.
+   */
+  function calcQuick(quick, settings, jobType) {
+    var q = quick || newQuick();
+    var area = num(q.sqft);
+    var profile = QUICK_PROFILE[jobType] || QUICK_PROFILE.residential;
+    var n = Math.max(1, area / profile.roomSqft);
+    var side = area > 0 ? Math.sqrt(area / n) : 0;
+    var one = calcRoom({
+      length: side, width: side, height: q.height, doors: profile.doors, windows: profile.windows,
+      coats: q.coats, condition: q.condition, surfaces: q.surfaces || {}
+    }, settings);
+
+    var coats = Math.round(num(q.coats, 2)) || 2;
+    var coatTxt = coats + (coats === 1 ? ' coat' : ' coats');
+    var wallArea = one.wallArea * n, trimLF = one.trimLF * n, doors = Math.round(n * profile.doors);
+    var details = {
+      primer: Math.round(wallArea).toLocaleString('en-US') + ' sq ft (est.)',
+      walls: Math.round(wallArea).toLocaleString('en-US') + ' sq ft (est.) · ' + coatTxt,
+      ceiling: Math.round(area).toLocaleString('en-US') + ' sq ft · ' + coatTxt,
+      trim: Math.round(trimLF).toLocaleString('en-US') + ' linear ft (est.) · ' + coatTxt,
+      doors: '~' + doors + ' doors · both sides',
+      prep: 'Move furniture, mask, drop cloths'
+    };
+    var lines = one.lines.map(function (l) {
+      return Object.assign({}, l, { detail: details[l.key] || l.detail,
+        hours: round2(l.hours * n), laborCost: round2(l.laborCost * n) });
+    });
+    var gallons = {};
+    Object.keys(one.gallons).forEach(function (k) { gallons[k] = one.gallons[k] * n; });
+    var hours = 0, laborCost = 0;
+    lines.forEach(function (l) { hours += l.hours; laborCost += l.laborCost; });
+
+    return {
+      length: 0, width: 0, height: one.height, floorArea: area,
+      wallArea: round2(wallArea), ceilingArea: round2(area), trimLF: round2(trimLF),
+      lines: area > 0 ? lines : [], gallons: area > 0 ? gallons : { wall: 0, ceiling: 0, trim: 0, primer: 0 },
+      hours: area > 0 ? round2(hours) : 0, laborCost: area > 0 ? round2(laborCost) : 0
+    };
+  }
+
   /** Full itemized quote for a job. */
   function calcJob(job, settings) {
     var s = Object.assign({}, DEFAULT_SETTINGS, settings);
     var mk = 1 + num(s.markup) / 100;
+    var quickMode = job.mode === 'quick';
 
     var totalGallons = { wall: 0, ceiling: 0, trim: 0, primer: 0 };
-    var rooms = (job.rooms || []).map(function (room) {
-      var c = calcRoom(room, s);
+    var source = quickMode
+      ? [{ id: 'quick', name: job.jobType === 'commercial' ? 'Whole space' : 'Whole home', quick: true }]
+      : (job.rooms || []);
+    var rooms = source.map(function (room) {
+      var c = room.quick ? calcQuick(job.quick, s, job.jobType) : calcRoom(room, s);
+      c.summary = room.quick
+        ? Math.round(c.floorArea).toLocaleString('en-US') + ' sq ft, ' + c.height + ' ft ceilings'
+        : c.length + '×' + c.width + ' ft, ' + c.height + ' ft ceilings';
       Object.keys(totalGallons).forEach(function (k) { totalGallons[k] += c.gallons[k]; });
       var lines = c.lines.map(function (l) { return Object.assign({}, l, { price: round2(l.laborCost * mk) }); });
       var price = 0;
@@ -281,6 +342,7 @@
     var profit = round2(revenue - cost);
 
     return {
+      quick: quickMode,
       rooms: rooms,
       materials: materials,
       extras: extras,
@@ -316,7 +378,9 @@
     propertyLabel: propertyLabel,
     CONDITIONS: CONDITIONS,
     newRoom: newRoom,
+    newQuick: newQuick,
     calcRoom: calcRoom,
+    calcQuick: calcQuick,
     calcJob: calcJob,
     round2: round2
   };

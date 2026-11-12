@@ -87,6 +87,30 @@ test('room presets and labels follow the job type', () => {
   assert.strictEqual(P.propertyLabel({}), '');
 });
 
+test('quick estimate turns square footage into a realistic wall area', () => {
+  const q = Object.assign(P.newQuick(), { sqft: 2000 });
+  const c = P.calcQuick(q, settings, 'residential');
+  // Rule of thumb: interior wall area is roughly 2.5–3.5x the floor area
+  assert.ok(c.wallArea > 2000 * 2.2 && c.wallArea < 2000 * 3.5, 'wall area ' + c.wallArea);
+  assert.ok(c.lines.some(l => l.key === 'walls'));
+  // Bigger home costs more, roughly in proportion
+  const big = P.calcQuick(Object.assign(P.newQuick(), { sqft: 4000 }), settings, 'residential');
+  assert.ok(big.laborCost > c.laborCost * 1.8 && big.laborCost < c.laborCost * 2.2);
+});
+
+test('quick mode prices the whole home and ignores room-by-room entries', () => {
+  const job = { mode: 'quick', jobType: 'residential', quick: Object.assign(P.newQuick(), { sqft: 1500 }),
+    rooms: [P.newRoom(P.ROOM_TYPES[1])] };
+  const q = P.calcJob(job, settings);
+  assert.strictEqual(q.quick, true);
+  assert.strictEqual(q.rooms.length, 1);
+  assert.strictEqual(q.rooms[0].name, 'Whole home');
+  assert.ok(q.total > 0 && q.materials.length > 0);
+  // Empty square footage = $0, no NaN
+  const empty = P.calcJob({ mode: 'quick', quick: P.newQuick() }, settings);
+  assert.strictEqual(empty.total, 0);
+});
+
 test('new rooms from presets have sensible defaults', () => {
   const r = P.newRoom(P.ROOM_TYPES[0]);
   assert.strictEqual(r.name, 'Bedroom');

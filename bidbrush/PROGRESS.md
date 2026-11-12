@@ -3,7 +3,7 @@
 **Goal:** The go-to quoting app for up-and-coming painters. Enter the job details, get an
 itemized price, send it to the customer. Free to start, paid plan later.
 
-**Where we are now:** Phase 1 is built, plus the Residential/Commercial job types. **Next: owner merges the pull request, then we turn on GitHub Pages.**
+**Where we are now:** Phase 1 is built, plus job types and the square-footage quick estimate. **Next: owner merges the pull request, then we turn on GitHub Pages.**
 
 Legend: ✅ done · 🔄 in progress · ⬜ not started
 
@@ -29,7 +29,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ✅ Commercial → Office, Retail, Restaurant, Warehouse or Other (owner to confirm this list)
 - ✅ Commercial room presets (Office, Conference Room, Open Floor, Lobby, Restroom, Break Room, Hallway)
 - ✅ Property type shown on the quote, email text and quote list; can be changed while editing
-- ⬜ Quick estimate from the home's total square footage (no measuring; cheap alternative to room scanning)
+- ✅ Quick estimate from the total square footage (⚡ Quick / 📐 Room by room switch; quote says it's a ballpark)
 - ⬜ Decide if property type should change pricing (e.g. condo building rules, commercial rates or after-hours work)
 
 ## Phase 2 — Get it online and in painters' hands ⬜
@@ -80,6 +80,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 | 2026-11-12 | App lives in `bidbrush/` folder | Keeps the GitHub profile README separate |
 | 2026-11-13 | Quotes start by picking Residential (House / Townhouse / Condo) or Commercial | Owner request; tailors room presets and shows the property on the quote |
 | 2026-11-13 | Room scanning postponed to the native-app stage | Works well only on Pro iPhones in a native app (App Store fees, much more work); AI photo guesses are too rough for pricing |
+| 2026-11-13 | Quick estimate treats the home as typical rooms (150 sq ft homes, 300 sq ft commercial) | Reuses the same pricing rules; lands around $3–6 per floor sq ft for walls + trim, in line with typical repaints |
 | 2026-11-12 | Name: **BidBrush** | Says what it does (bids) and who it's for (painters); short and works as a social handle |
 
 ## Log
@@ -94,3 +95,4 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
   commercial room presets, and the property on quotes. 9 tests passing; tested on a simulated iPhone.
 - **2026-11-13** — Opened the pull request to merge into `main`. Looked into room scanning:
   postponed to Phase 4; added a whole-home square-footage quick estimate as a cheaper idea.
+- **2026-11-13** — Built the square-footage quick estimate. 11 tests passing; tested on a simulated iPhone.

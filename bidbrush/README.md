@@ -5,7 +5,8 @@ Price an interior paint job in minutes on your phone and send the customer a pro
 ## How it works (for painters)
 
 1. **Set up once** (⚙️): business name, logo, labor rate, markup and paint prices.
-2. **New Quote**: enter the customer, then tap room types (Bedroom, Kitchen…).
+2. **New Quote**: pick Residential (House / Townhouse / Condo) or Commercial, enter the customer.
+   Use **⚡ Quick** for a ballpark from the total square footage, or **📐 Room by room**: tap room types (Bedroom, Kitchen…).
    Pick Small / Medium / Large or type exact measurements, tap what's being painted
    (walls, ceiling, trim, doors), and choose coats and wall condition. The price updates as you go.
 3. **Review & Send**: email, text, save as PDF or copy the itemized quote.
