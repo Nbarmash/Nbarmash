@@ -1,9 +1,9 @@
-# BidBrush — Project Tracker
+# Coatwright — Project Tracker
 
 **Goal:** The go-to quoting app for up-and-coming painters. Enter the job details, get an
 itemized price, send it to the customer. Free to start, paid plan later.
 
-**Where we are now:** Phase 1 is built, plus job types, full commercial list and quick estimate. **Name needs to change (BidBrush is taken).** **Next: owner merges the pull request, then we turn on GitHub Pages.**
+**Where we are now:** Phase 1 is built, plus job types, full commercial list and quick estimate. Renamed to **Coatwright**. **Next: owner checks the domain/handles, merges the pull request, then we turn on GitHub Pages.**
 
 Legend: ✅ done · 🔄 in progress · ⬜ not started
 
@@ -39,9 +39,9 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ⬜ Turn on GitHub Pages so the app has a public link
 - ⬜ Install it on your own phone and quote a real (or pretend) job
 - ⬜ Check the default prices against real local numbers
-- 🔄 Pick a final name: **BidBrush** is likely taken (bidbrush.pro exists; "BrushBid" is a painter estimating app). Choosing a new one
-- ✅ Rename the app to BidBrush (folder is now `bidbrush/`)
-- ⬜ Check bidbrush.com / bidbrush.app, social handles (TikTok, Instagram, Facebook) and the US trademark search, then grab them
+- ✅ Pick a final name: **Coatwright** (first pick BidBrush was taken)
+- ✅ Rename the app to Coatwright (folder is now `coatwright/`)
+- ⬜ Check coatwright.com / coatwright.app, social handles (TikTok, Instagram, Facebook) and the US trademark search, then grab them
 - ⬜ Give it free to 5–10 local painters
 - ⬜ Collect feedback: what's confusing, what's missing, what they'd pay
 
@@ -78,12 +78,13 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 |---|---|---|
 | 2026-11-12 | Web app instead of App Store app to start | Free, no app review, works on any phone |
 | 2026-11-12 | No AI inside the app for now | Pricing is math; keeps running costs at $0 |
-| 2026-11-12 | App lives in `bidbrush/` folder | Keeps the GitHub profile README separate |
+| 2026-11-12 | App lives in its own folder (now `coatwright/`) | Keeps the GitHub profile README separate |
 | 2026-11-13 | Quotes start by picking Residential (House / Townhouse / Condo) or Commercial | Owner request; tailors room presets and shows the property on the quote |
 | 2026-11-13 | Room scanning postponed to the native-app stage | Works well only on Pro iPhones in a native app (App Store fees, much more work); AI photo guesses are too rough for pricing |
 | 2026-11-13 | Quick estimate treats the home as typical rooms (150 sq ft homes, 300 sq ft commercial) | Reuses the same pricing rules; lands around $3–6 per floor sq ft for walls + trim, in line with typical repaints |
 | 2026-11-13 | Commercial covers every business type with its own common areas | Owner: "include everything, big or small" |
 | 2026-11-13 | Drop the BidBrush name | Owner found bidbrush.pro; a painter estimating app called BrushBid also exists, so trademark and search confusion risk |
+| 2026-11-13 | Name: **Coatwright** | "Wright" = skilled craftsman; sounds established, made-up word so easier to trademark; no painting app or business found with it |
 | 2026-11-12 | Name: **BidBrush** (replaced) | Says what it does (bids) and who it's for (painters); short and works as a social handle |
 
 ## Log
@@ -101,3 +102,5 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - **2026-11-13** — Built the square-footage quick estimate. 11 tests passing; tested on a simulated iPhone.
 - **2026-11-13** — Expanded Commercial (15 property types, 31 area types, tall-wall pricing). 14 tests passing.
   Owner found bidbrush.pro; BrushBid also exists. Name to be changed before launch.
+- **2026-11-13** — Checked ~20 replacement names (Quoter, Spackle, Hueprint, Tintwork and others were taken).
+  Owner picked **Coatwright**. Renamed the app and folder (`coatwright/`). Added a small "Made with Coatwright" line to quotes.

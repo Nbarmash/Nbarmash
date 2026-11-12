@@ -1,4 +1,4 @@
-// Run with: node --test bidbrush/tests
+// Run with: node --test coatwright/tests
 const test = require('node:test');
 const assert = require('node:assert');
 const P = require('../pricing.js');

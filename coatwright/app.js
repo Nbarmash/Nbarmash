@@ -1,4 +1,4 @@
-/* BidBrush UI — plain JavaScript, no build step. */
+/* Coatwright UI — plain JavaScript, no build step. */
 (function () {
   'use strict';
 
@@ -378,6 +378,7 @@
       (job.notes ? '<div class="doc-notes"><div class="label">Notes</div>' + esc(job.notes).replace(/\n/g, '<br>') + '</div>' : '') +
       (s.terms ? '<div class="doc-terms">' + esc(s.terms) + '</div>' : '') +
       '<div class="doc-sign"><div>Customer signature</div><div>Date</div></div>' +
+      '<div class="doc-made">Estimate made with Coatwright</div>' +
       '</article>';
   }
 
@@ -416,6 +417,7 @@
     if (s.terms) out.push(s.terms, '');
     out.push('Reply to this email to accept or with any questions.', '');
     out.push([s.ownerName, s.businessName, s.phone, s.email].filter(Boolean).join('\n'));
+    out.push('', '—', 'Estimate made with Coatwright');
     return out.join('\n');
   }
 

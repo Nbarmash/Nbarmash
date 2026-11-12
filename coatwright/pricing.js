@@ -1,5 +1,5 @@
 /*
- * BidBrush pricing engine.
+ * Coatwright pricing engine.
  * Pure functions only (no DOM) so it can be tested in Node and reused anywhere.
  */
 (function (global) {
