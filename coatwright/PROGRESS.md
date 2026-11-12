@@ -3,7 +3,7 @@
 **Goal:** The go-to quoting app for up-and-coming painters. Enter the job details, get an
 itemized price, send it to the customer. Free to start, paid plan later.
 
-**Where we are now:** Live: app, invoices/schedule/customers, cabinets, landing page v1. On the working branch: professional landing page redesign, Privacy Policy & Terms, and first-run onboarding. **Next: merge so they go live; owner provides a support email, sends bidbrush.pro screenshots, creates social accounts.**
+**Where we are now:** Everything is live: professional landing page (https://nbarmash.github.io/Nbarmash/), Privacy & Terms, and the app (https://nbarmash.github.io/Nbarmash/coatwright/) with onboarding, quoting, business tools, invoices, schedule and customers. **Next (owner): support email for the site, bidbrush.pro screenshots, create social accounts, test with 5–10 painters.**
 
 Legend: ✅ done · 🔄 in progress · ⬜ not started
 
@@ -155,3 +155,4 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - **2026-11-13** — Owner asked for social handles. Built the social media kit (images, bios, setup steps, first posts); owner to create the accounts.
 - **2026-11-13** — Owner wants a more professional site. bidbrush.pro is blocked from Claude's environment (owner declined a network change). Redesigned the landing page and added Privacy Policy and Terms.
 - **2026-11-13** — Added first-run onboarding (business info, rate presets, sample quote, install help). 29 tests passing; full walkthroughs pass.
+- **2026-11-13** — Merged pull request #4 (landing redesign, Privacy & Terms, onboarding, social kit). All live.
