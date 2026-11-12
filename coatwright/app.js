@@ -436,6 +436,27 @@
           '<div class="label">Size</div>' + oSeg(i, 'size', item.size, [['single', 'Single'], ['double', 'Double']]) +
           '<div class="label">Coats</div>' + oSeg(i, 'coats', item.coats, COATS_12);
         break;
+      case 'cabinets':
+        body = '<div class="row2">' + oStep(i, 'doors', item.doors, 'Doors') + oStep(i, 'drawers', item.drawers, 'Drawers') + '</div>' +
+          '<div class="dims two">' + oNum(i, 'boxes', item.boxes, 'Cabinet boxes', 'linear ft') + '</div>' +
+          '<div class="label">Method</div>' + oSeg(i, 'method', item.method, [['spray', 'Spray'], ['brush', 'Brush & roll']]) +
+          '<div class="label">Paint the insides too?</div>' + oSeg(i, 'insides', item.insides ? 1 : 0, [[0, 'Outside only'], [1, 'Inside & out']]) +
+          '<div class="label">Condition</div>' + oSeg(i, 'condition', item.condition, [['good', 'Good'], ['fair', 'Greasy / worn'], ['poor', 'Damaged']]);
+        break;
+      case 'wallpaper':
+        body = '<div class="dims two">' + oNum(i, 'sqft', item.sqft, 'Wallpaper area', 'sq ft') + '</div>' +
+          '<p class="muted small">Tip: wall length × height for each papered wall.</p>' +
+          '<div class="label">How stubborn?</div>' + oSeg(i, 'condition', item.condition, [['good', 'Peels easily'], ['fair', 'Average'], ['poor', 'Multiple layers']]);
+        break;
+      case 'popcorn':
+        body = '<div class="dims two">' + oNum(i, 'sqft', item.sqft, 'Ceiling area', 'sq ft') + '</div>' +
+          '<div class="label">New finish</div>' + oSeg(i, 'retexture', item.retexture, [['smooth', 'Smooth'], ['knockdown', 'Knockdown']]) +
+          '<div class="label">Asbestos test</div>' + oSeg(i, 'test', item.test, [[1, 'Include ($75)'], [0, 'Not needed']]) +
+          '<p class="muted small">⚠️ Homes built before 1980 should be tested before scraping.</p>';
+        break;
+      case 'drywall':
+        body = oStep(i, 'small', item.small, 'Small (up to 6")') + oStep(i, 'large', item.large, 'Large (over 6")');
+        break;
       case 'floor':
         var garage = /garage/i.test(item.name);
         body = (garage ? '<div class="label">Garage size</div><div class="chips">' + Object.keys(P.GARAGE_SIZES).concat('custom').map(function (k) {
@@ -497,13 +518,15 @@
           '<div class="room-types">' + moreTypes.join('') + '</div></details>' : '') +
         '</section>') +
 
-      '<h2 class="section-title"><span class="step">3</span> Outside & floors <em class="muted small">(optional)</em></h2>' +
+      '<h2 class="section-title"><span class="step">3</span> Exterior, floors & specialty <em class="muted small">(optional)</em></h2>' +
       job.outside.map(function (it, i) { return outsideCard(it, i, calc.outside[i]); }).join('') +
-      '<section class="card add-room"><div class="label">' + (job.outside.length ? 'Add more' : 'Exterior, deck, fence, garage floor…') + '</div>' +
-      '<div class="room-types">' + P.OUTSIDE_TYPES.map(function (t, k) {
-        var nm = (commercial && t.commercialName) || t.name;
-        return '<button type="button" data-action="add-out" data-k="' + k + '"><span>' + t.icon + '</span>' + esc(nm) + '</button>';
-      }).join('') + '</div></section>' +
+      '<section class="card add-room">' + P.OUTSIDE_GROUPS.map(function (g) {
+        return '<div class="label">' + g[1] + '</div><div class="room-types">' + P.OUTSIDE_TYPES.map(function (t, k) {
+          if (t.group !== g[0]) return '';
+          var nm = (commercial && t.commercialName) || t.name;
+          return '<button type="button" data-action="add-out" data-k="' + k + '"><span>' + t.icon + '</span>' + esc(nm) + '</button>';
+        }).join('') + '</div>';
+      }).join('') + '</section>' +
 
       '<details class="card"' + (job.extras.length || job.discount || job.notes ? ' open' : '') + '><summary class="card-title"><span class="step">4</span> Extras, discount & notes <em class="muted small">(optional)</em></summary>' +
       job.extras.map(function (e, i) {
@@ -1030,7 +1053,8 @@
       setField('stainPrice', 'Deck & fence stain', { type: 'number', pre: '$', unit: '/gal' }) + '</div>' +
       '<div class="row2">' + setField('floorPaintPrice', 'Floor paint', { type: 'number', pre: '$', unit: '/gal' }) +
       setField('epoxySqft', 'Epoxy kit', { type: 'number', pre: '$', unit: '/sq ft' }) + '</div>' +
-      '<div class="row2">' + setField('flakeSqft', 'Epoxy + flake kit', { type: 'number', pre: '$', unit: '/sq ft' }) + '</div></section>' +
+      '<div class="row2">' + setField('flakeSqft', 'Epoxy + flake kit', { type: 'number', pre: '$', unit: '/sq ft' }) +
+      setField('cabinetPaintPrice', 'Cabinet enamel', { type: 'number', pre: '$', unit: '/gal' }) + '</div></section>' +
 
       '<details class="card"><summary class="card-title">How fast you work <em class="muted small">(advanced)</em></summary>' +
       '<p class="muted small">Per coat, for one painter. The defaults suit most painters — adjust once you\'ve timed a few jobs.</p>' +
@@ -1043,7 +1067,8 @@
       '<div class="row2">' + setField('extWallRate', 'Exterior siding', { type: 'number', unit: 'sq ft/hr' }) +
       setField('deckRate', 'Decks', { type: 'number', unit: 'sq ft/hr' }) + '</div>' +
       '<div class="row2">' + setField('fenceRate', 'Fences', { type: 'number', unit: 'sq ft/hr' }) +
-      setField('floorRate', 'Floor paint', { type: 'number', unit: 'sq ft/hr' }) + '</div></details>' +
+      setField('floorRate', 'Floor paint', { type: 'number', unit: 'sq ft/hr' }) + '</div>' +
+      '<div class="row2">' + setField('cabinetDoorHours', 'Each cabinet door', { type: 'number', unit: 'hrs' }) + '</div></details>' +
 
       '<section class="card"><h2 class="card-title">Quote fine print</h2>' +
       setField('terms', 'Terms shown on every quote', { textarea: true }) + '</section>' +
@@ -1310,7 +1335,8 @@
         return;
       case 'o-seg': {
         var of = el.dataset.field, ov = el.dataset.v;
-        job.outside[i][of] = ['siding', 'system', 'condition', 'size'].indexOf(of) !== -1 ? ov : +ov;
+        job.outside[i][of] = ['siding', 'system', 'condition', 'size', 'method', 'retexture'].indexOf(of) !== -1 ? ov
+          : of === 'insides' ? ov === '1' : +ov;
         touch(job); renderJob(job);
         return;
       }

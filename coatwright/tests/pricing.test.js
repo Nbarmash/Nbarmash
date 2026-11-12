@@ -189,3 +189,29 @@ test('outside items add on top of interior, in both quick and room-by-room mode'
   // house size defaults to the quick-estimate square footage
   assert.strictEqual(P.newOutside(t, { quick }).sqft, 2000);
 });
+
+test('cabinets: spraying is faster than brushing, insides add work, enamel is a material', () => {
+  const t = P.OUTSIDE_TYPES.find(x => x.name === 'Kitchen Cabinets');
+  const c = P.newOutside(t, { jobType: 'residential' });
+  const spray = P.calcOutside(c, settings);
+  const brush = P.calcOutside(Object.assign({}, c, { method: 'brush' }), settings);
+  const inside = P.calcOutside(Object.assign({}, c, { insides: true }), settings);
+  assert.ok(brush.hours > spray.hours);
+  assert.ok(inside.hours > spray.hours);
+  assert.ok(P.calcJob({ outside: [c] }, settings).materials.some(m => m.key === 'cabinet'));
+});
+
+test('specialty: popcorn asbestos test is optional; drywall and wallpaper add materials', () => {
+  const pop = P.newOutside(P.OUTSIDE_TYPES.find(x => x.type === 'popcorn'), { jobType: 'residential' });
+  const withTest = P.calcJob({ outside: [pop] }, settings);
+  const noTest = P.calcJob({ outside: [Object.assign({}, pop, { test: 0 })] }, settings);
+  assert.ok(withTest.materials.some(m => m.key === 'asbestos'));
+  assert.ok(!noTest.materials.some(m => m.key === 'asbestos'));
+  const dw = P.newOutside(P.OUTSIDE_TYPES.find(x => x.type === 'drywall'), {});
+  assert.ok(P.calcJob({ outside: [dw] }, settings).materials.some(m => m.key === 'drywall' && m.cost === 31));
+  const wp = P.newOutside(P.OUTSIDE_TYPES.find(x => x.type === 'wallpaper'), {});
+  const rough = P.calcOutside(Object.assign({}, wp, { condition: 'poor' }), settings);
+  assert.ok(rough.hours > P.calcOutside(wp, settings).hours, 'multiple layers take longer');
+  assert.deepStrictEqual(P.OUTSIDE_GROUPS.map(g => g[0]), ['exterior', 'floor', 'specialty']);
+  P.OUTSIDE_TYPES.forEach(x => assert.ok(P.OUTSIDE_GROUPS.some(g => g[0] === x.group), x.name + ' has a group'));
+});

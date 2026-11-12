@@ -374,3 +374,9 @@ select {
   .quote-doc { box-shadow: none; padding: 0; }
   .lines tr { break-inside: avoid; }
 }
+
+/* Steppers fit in narrow two-column rows */
+.stepper { min-width: 0; }
+.stepper-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stepper button { flex: none; width: 36px; }
+.row2 .stepper { gap: 4px; }

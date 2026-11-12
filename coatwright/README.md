@@ -6,7 +6,8 @@ Price an interior paint job in minutes on your phone and send the customer a pro
 
 1. **Set up once** (⚙️): business name, logo, labor rate, markup and paint prices.
 2. **New Quote**: pick Residential (House / Townhouse / Condo) or Commercial, enter the customer.
-   Add **Outside & floors**: whole-house exterior, deck, fence, doors, shutters, garage floor (paint, epoxy or flakes).
+   Add **Exterior, floors & specialty**: whole-house exterior, deck, fence, doors, shutters, garage floor (paint, epoxy or flakes),
+   kitchen cabinets and vanities, wallpaper removal, popcorn ceiling removal, drywall repair.
    Use **⚡ Quick** for a ballpark from the total square footage, or **📐 Room by room**: tap room types (Bedroom, Kitchen…).
    Pick Small / Medium / Large or type exact measurements, tap what's being painted
    (walls, ceiling, trim, doors), and choose coats and wall condition. The price updates as you go.

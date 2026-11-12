@@ -70,7 +70,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ✅ Exterior: whole-house exterior (home size, stories, siding type, condition; siding, trim & fascia, soffits), decks, fences, entry doors, garage doors, shutters
 - ✅ Floors: garage floor (1/2/3-car presets) with floor paint, epoxy or epoxy + flakes; basement and porch/patio floors; shop/warehouse floor for commercial
 - ✅ "Outside & floors" section works with both Quick and Room-by-room interior pricing; own prices and work speeds in Settings
-- ⬜ Cabinets and other common add-ons
+- ✅ Cabinets (kitchen & vanity: doors, drawers, boxes, spray vs brush, insides) and add-ons: wallpaper removal, popcorn ceiling removal (optional asbestos test), drywall repair
 - ⬜ Fixes from painter feedback
 
 ## Phase 4 — Start making money ⬜
@@ -139,3 +139,4 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - **2026-11-13** — Merged pull request #2 (business tools, exterior, floors); GitHub Pages redeployed.
 - **2026-11-13** — Owner chose next: invoices/schedule/customers, cabinets & add-ons, landing page, video plan.
   Built invoices, schedule and customers. 27 tests passing; tested on a simulated iPhone.
+- **2026-11-13** — Added cabinets and specialty add-ons (section renamed "Exterior, floors & specialty"); fixed stepper buttons overflowing on narrow phones. 29 tests passing.
