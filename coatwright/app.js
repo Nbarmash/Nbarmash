@@ -36,10 +36,12 @@
     });
   }
   function money(n) {
-    return '$' + (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    var v = Number(n) || 0;
+    return (v < 0 ? '−$' : '$') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
   function money0(n) {
-    return '$' + Math.round(Number(n) || 0).toLocaleString('en-US');
+    var v = Math.round(Number(n) || 0);
+    return (v < 0 ? '−$' : '$') + Math.abs(v).toLocaleString('en-US');
   }
   function fmtDate(ts) {
     return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });

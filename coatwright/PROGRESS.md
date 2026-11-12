@@ -3,7 +3,7 @@
 **Goal:** The go-to quoting app for up-and-coming painters. Enter the job details, get an
 itemized price, send it to the customer. Free to start, paid plan later.
 
-**Where we are now:** Phase 1 is built, plus job types, full commercial list and quick estimate. **Coatwright is live** at https://nbarmash.github.io/Nbarmash/coatwright/ . Business tools, exterior and floors are live. **Next: test on your phone, send bidbrush.pro screenshots for a feature-by-feature comparison.**
+**Where we are now:** Live app at https://nbarmash.github.io/Nbarmash/coatwright/ (quoting, business tools, exterior & floors). Invoices/schedule/customers, cabinets & add-ons, the landing page and the video plan are built on the working branch. **Next: merge them so they go live; owner tests on a phone, grabs the domain/handles, and starts posting videos.**
 
 Legend: ✅ done · 🔄 in progress · ⬜ not started
 
@@ -82,12 +82,12 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ⬜ Paid plan (e.g. free for 3 quotes/month, monthly fee for unlimited + logo)
 - ✅ Landing page at https://nbarmash.github.io/Nbarmash/ (root `index.html`, screenshots in `landing/`); the app stays at `/coatwright/`
 
-## Phase 5 — Grow ⬜
+## Phase 5 — Grow 🔄
 
 - ⬜ Post in painter Facebook groups and subreddits
-- ⬜ Video plan: 20–30 scripts with hooks, captions and hashtags (TikTok, Reels, Shorts, Facebook)
-- ⬜ Real app demo videos recorded automatically (e.g. "quote a room in 60 seconds")
-- ⬜ AI-generated videos (job-site scenes, voiceover) made from the scripts
+- ✅ Video plan: 25 scripts with hooks, captions, hashtags, AI prompts and a 30-day schedule (`marketing/VIDEO_PLAN.md`)
+- ✅ First 2 real app demo videos recorded (`marketing/videos/`: quick quote, business stats); more on request
+- ⬜ AI-generated videos (job-site scenes, voiceover): prompts ready in the plan; owner generates them in an AI video tool
 - ⬜ Posting schedule: 1–3 videos a day, track which ones bring sign-ups
 - ⬜ Reach out to local paint supply stores
 - ⬜ Referral offer (free month for each painter referred)
@@ -142,3 +142,4 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
   Built invoices, schedule and customers. 27 tests passing; tested on a simulated iPhone.
 - **2026-11-13** — Added cabinets and specialty add-ons (section renamed "Exterior, floors & specialty"); fixed stepper buttons overflowing on narrow phones. 29 tests passing.
 - **2026-11-13** — Built the landing page with real app screenshots (sample data). Fixed stepper labels being cut off.
+- **2026-11-13** — Wrote the launch video plan and recorded 2 demo videos from the real app. Fixed negative money showing as "$-140".
