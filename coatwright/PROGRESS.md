@@ -3,7 +3,7 @@
 **Goal:** The go-to quoting app for up-and-coming painters. Enter the job details, get an
 itemized price, send it to the customer. Free to start, paid plan later.
 
-**Where we are now:** Phase 1 is built, plus job types, full commercial list and quick estimate. **Coatwright is live** at https://nbarmash.github.io/Nbarmash/coatwright/ . Business tools, exterior and floors are built. **Next: merge so they go live, then test on your phone.**
+**Where we are now:** Phase 1 is built, plus job types, full commercial list and quick estimate. **Coatwright is live** at https://nbarmash.github.io/Nbarmash/coatwright/ . Business tools, exterior and floors are live. **Next: test on your phone, send bidbrush.pro screenshots for a feature-by-feature comparison.**
 
 Legend: ✅ done · 🔄 in progress · ⬜ not started
 
@@ -33,7 +33,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ✅ Quick estimate from the total square footage (⚡ Quick / 📐 Room by room switch; quote says it's a ballpark)
 - ✅ Property type does not change pricing rules for now (owner: "everything else is good")
 
-## Phase 1c — Business tools (run the whole company, not just quotes) 🔄
+## Phase 1c — Business tools (run the whole company, not just quotes) ✅
 
 - ✅ Job status for every quote: Draft → Sent → Won → Scheduled → Completed → Paid (or Lost), with dates
 - ✅ Quotes auto-marked "Sent" when emailed, texted, copied or saved as PDF
@@ -46,7 +46,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ✅ Monthly money chart (with table view), residential vs commercial split, smart insights
 - ✅ Exports for the accountant (jobs, payments, expenses spreadsheets)
 - ✅ Backup & restore so history is never lost; data stays private on the device
-- ⬜ Merge to `main` so it goes live
+- ✅ Merged to `main` (pull request #2) and live
 - ⬜ Compare with bidbrush.pro feature by feature (owner to send screenshots; site is blocked from Claude's environment)
 - ⬜ Ideas next: customer list with job history, job photos, calendar view, invoices, deposit links
 
@@ -133,3 +133,4 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
   accountant exports, backup/restore. 21 tests passing; full job lifecycle tested on a simulated iPhone.
 - **2026-11-13** — Added exterior (house, deck, fence, doors, garage doors, shutters) and floors (garage floor with paint/epoxy/flake,
   basement, porch). Fixed a paint-total bug caught by the new tests. 25 tests passing; tested on a simulated iPhone.
+- **2026-11-13** — Merged pull request #2 (business tools, exterior, floors); GitHub Pages redeployed.
