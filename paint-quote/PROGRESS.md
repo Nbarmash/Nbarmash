@@ -28,7 +28,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ⬜ Turn on GitHub Pages so the app has a public link
 - ⬜ Install it on your own phone and quote a real (or pretend) job
 - ⬜ Check the default prices against real local numbers
-- ⬜ Pick a final name and check the name/domain are available
+- 🔄 Pick a final name (shortlist: BidBrush, Cut & Quote, QuoteCoat, FirstCoat), check the domain, social handles and trademarks, then rename the app
 - ⬜ Give it free to 5–10 local painters
 - ⬜ Collect feedback: what's confusing, what's missing, what they'd pay
 
@@ -49,7 +49,10 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 ## Phase 5 — Grow ⬜
 
 - ⬜ Post in painter Facebook groups and subreddits
-- ⬜ Short videos: "quote a room in 60 seconds"
+- ⬜ Video plan: 20–30 scripts with hooks, captions and hashtags (TikTok, Reels, Shorts, Facebook)
+- ⬜ Real app demo videos recorded automatically (e.g. "quote a room in 60 seconds")
+- ⬜ AI-generated videos (job-site scenes, voiceover) made from the scripts
+- ⬜ Posting schedule: 1–3 videos a day, track which ones bring sign-ups
 - ⬜ Reach out to local paint supply stores
 - ⬜ Referral offer (free month for each painter referred)
 
@@ -68,3 +71,5 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - **2026-11-12** — Chose approach. Built and tested Phase 1 (pricing engine, quote builder,
   customer estimate, sending, settings, offline). Pushed to branch `claude/serene-carson-hods6d`.
   Created this tracker.
+- **2026-11-12** — Name brainstorm: shortlist made, waiting for the owner to pick. Added the
+  social-media video plan to Phase 5 (start when the app is ready to launch).
