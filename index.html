@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coatwright · Paint quotes in minutes</title>
+  <meta name="description" content="Price any paint job in minutes, send a professional itemized quote, and know what you really made. Free quoting and business app for painters.">
+  <meta name="theme-color" content="#1f5eff">
+  <meta property="og:title" content="Coatwright · Paint quotes in minutes">
+  <meta property="og:description" content="Price any paint job in minutes, send a professional itemized quote, and know what you really made.">
+  <meta property="og:image" content="https://nbarmash.github.io/Nbarmash/landing/shot-estimate.png">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="coatwright/icon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --bg: #f4f6fb; --card: #fff; --text: #16203a; --muted: #5c6782; --line: #e3e7f0;
+      --brand: #1f5eff; --brand-soft: #e8efff; --ink-soft: #2b3554;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--text);
+      font: 17px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    a { color: var(--brand); }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 21px; color: var(--text); text-decoration: none; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 24px;
+      border-radius: 14px; background: var(--brand); color: #fff; font-weight: 700; text-decoration: none; font-size: 17px;
+      box-shadow: 0 8px 24px rgba(31, 94, 255, .28); }
+    .btn:active { transform: scale(.98); }
+    .btn.small { min-height: 42px; padding: 0 16px; font-size: 15px; box-shadow: none; }
+    .btn.ghost { background: #fff; color: var(--text); box-shadow: none; border: 1px solid var(--line); }
+
+    .hero { display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: center; padding: 40px 0 56px; }
+    .eyebrow { display: inline-block; padding: 4px 12px; border-radius: 999px; background: var(--brand-soft); color: var(--brand);
+      font-weight: 700; font-size: 14px; }
+    h1 { font-size: 52px; line-height: 1.05; letter-spacing: -1.5px; margin: 16px 0; }
+    h1 span { color: var(--brand); }
+    .lead { font-size: 20px; color: var(--ink-soft); margin: 0 0 26px; max-width: 34em; }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .fine { color: var(--muted); font-size: 14px; margin-top: 14px; }
+    .phones { position: relative; height: 560px; }
+    .phone { position: absolute; width: 250px; border-radius: 34px; padding: 9px; background: #10162a;
+      box-shadow: 0 30px 60px rgba(16, 22, 42, .25); }
+    .phone img { display: block; width: 100%; border-radius: 26px; }
+    .phone.a { left: 0; top: 30px; transform: rotate(-4deg); }
+    .phone.b { right: 0; top: 0; transform: rotate(3deg); }
+
+    section { padding: 56px 0; }
+    h2 { font-size: 36px; letter-spacing: -.8px; line-height: 1.15; margin: 0 0 10px; text-align: center; }
+    .sub { text-align: center; color: var(--muted); margin: 0 auto 36px; max-width: 36em; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .card { background: var(--card); border-radius: 18px; padding: 22px; box-shadow: 0 1px 2px rgba(22,32,58,.06), 0 6px 20px rgba(22,32,58,.05); }
+    .card .ic { font-size: 30px; }
+    .card h3 { margin: 10px 0 6px; font-size: 19px; }
+    .card p { margin: 0; color: var(--ink-soft); font-size: 16px; }
+
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+    .split h2, .split .sub { text-align: left; margin-left: 0; }
+    .split.flip .shot { order: -1; }
+    .shot { display: flex; justify-content: center; }
+    .shot .phone { position: static; transform: none; width: 270px; }
+    ul.ticks { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+    ul.ticks li { padding-left: 32px; position: relative; color: var(--ink-soft); }
+    ul.ticks li::before { content: '✓'; position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 50%;
+      background: var(--brand-soft); color: var(--brand); font-weight: 800; font-size: 13px; display: grid; place-items: center; }
+
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: s; }
+    .steps .card { position: relative; padding-top: 54px; }
+    .steps .card::before { counter-increment: s; content: counter(s); position: absolute; top: 18px; left: 22px; width: 28px; height: 28px;
+      border-radius: 50%; background: var(--brand); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 15px; }
+
+    .trust { background: #10162a; color: #fff; border-radius: 28px; padding: 44px 28px; }
+    .trust h2 { color: #fff; }
+    .trust .sub { color: #b9c2da; }
+    .trust .grid .card { background: #1a2240; box-shadow: none; }
+    .trust .card p { color: #c9d1e6; }
+
+    details { background: var(--card); border-radius: 14px; padding: 16px 20px; margin-bottom: 10px; }
+    summary { cursor: pointer; font-weight: 700; }
+    details p { color: var(--ink-soft); margin: 10px 0 0; }
+    .faq { max-width: 760px; margin: 0 auto; }
+
+    .final { text-align: center; padding: 64px 0 80px; }
+    footer { border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--muted); font-size: 14px; display: flex;
+      flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+
+    @media (max-width: 860px) {
+      h1 { font-size: 40px; }
+      .hero, .split { grid-template-columns: 1fr; gap: 28px; }
+      .split.flip .shot { order: 0; }
+      .phones { height: 470px; max-width: 420px; margin: 0 auto; width: 100%; }
+      .phone { width: 210px; }
+      .grid, .steps { grid-template-columns: 1fr; }
+      h2 { font-size: 30px; }
+      .split h2, .split .sub { text-align: center; margin-left: auto; }
+    }
+    @media (max-width: 420px) {
+      h1 { font-size: 34px; }
+      .lead { font-size: 18px; }
+      .phones { height: 400px; }
+      .phone { width: 175px; border-radius: 26px; padding: 7px; }
+      .phone img { border-radius: 20px; }
+      .cta-row .btn { width: 100%; }
+      .trust { padding: 32px 18px; border-radius: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <a class="brand" href="./"><img src="coatwright/icon.svg" alt="" width="34" height="34"> Coatwright</a>
+      <a class="btn small" href="coatwright/">Open the app</a>
+    </nav>
+
+    <header class="hero">
+      <div>
+        <span class="eyebrow">Built for up-and-coming painters</span>
+        <h1>Price any paint job <span>in minutes.</span> Know what you really made.</h1>
+        <p class="lead">Coatwright turns a walkthrough into a professional, itemized quote your customer can say yes to,
+          then tracks every job, payment and dollar of profit all year.</p>
+        <div class="cta-row">
+          <a class="btn" href="coatwright/">Start free →</a>
+          <a class="btn ghost" href="#how">See how it works</a>
+        </div>
+        <p class="fine">No signup. No download. Works on any phone.</p>
+      </div>
+      <div class="phones" aria-hidden="true">
+        <div class="phone a"><img src="landing/shot-quote.png" alt=""></div>
+        <div class="phone b"><img src="landing/shot-estimate.png" alt=""></div>
+      </div>
+    </header>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <h2>Everything you paint, priced right</h2>
+      <p class="sub">Inside, outside, big or small: residential and commercial, all with your own rates.</p>
+      <div class="grid">
+        <div class="card"><div class="ic">⚡</div><h3>Quick or exact</h3><p>Ballpark a whole home from its square footage in seconds, or go room by room after the walkthrough.</p></div>
+        <div class="card"><div class="ic">🏡</div><h3>Interior & exterior</h3><p>Rooms, ceilings, trim, doors, siding, soffits, decks, fences and shutters, with stories and siding type built in.</p></div>
+        <div class="card"><div class="ic">🚗</div><h3>Floors & cabinets</h3><p>Garage floors in paint, epoxy or flake. Kitchen cabinets, vanities, wallpaper and popcorn removal, drywall repair.</p></div>
+        <div class="card"><div class="ic">🏬</div><h3>Commercial too</h3><p>Offices, restaurants, medical, warehouses, churches, gyms and more, each with its own common areas.</p></div>
+        <div class="card"><div class="ic">📄</div><h3>Quotes that win</h3><p>Your logo, every line item, deposit and terms. Email, text or PDF it before you leave the driveway.</p></div>
+        <div class="card"><div class="ic">🧾</div><h3>Invoices in one tap</h3><p>Turn a won job into an invoice that shows payments received and the balance due.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap split">
+      <div>
+        <h2>Know your real numbers</h2>
+        <p class="sub">Most painters guess. You'll know.</p>
+        <ul class="ticks">
+          <li>What you <b>actually made</b> this year, after paint, helpers and business expenses</li>
+          <li>Your <b>real hourly rate</b> on every job, and whether your quotes cover your time</li>
+          <li>Win rate, average job, money still owed to you, and quotes waiting on an answer</li>
+          <li>Plain-English tips, like "jobs take 12% longer than you quote"</li>
+          <li>Spreadsheets for your accountant at tax time</li>
+        </ul>
+      </div>
+      <div class="shot"><div class="phone"><img src="landing/shot-stats.png" alt="Coatwright business stats screen showing yearly profit"></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap split flip">
+      <div>
+        <h2>Run the whole business</h2>
+        <p class="sub">From first quote to final payment.</p>
+        <ul class="ticks">
+          <li>Every job tracked: Sent → Won → Scheduled → Completed → Paid</li>
+          <li>Log deposits and payments by cash, check, Zelle, Venmo or card</li>
+          <li>A schedule of upcoming jobs with how many days each one takes</li>
+          <li>Every customer's history, with one-tap call, text, email and map</li>
+        </ul>
+      </div>
+      <div class="shot"><div class="phone"><img src="landing/shot-jobs.png" alt="Coatwright jobs list with statuses and yearly totals"></div></div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="wrap">
+      <h2>Your first quote in 3 steps</h2>
+      <p class="sub">Your first quote can be done in about five minutes.</p>
+      <div class="steps">
+        <div class="card"><h3>Set your rates once</h3><p>Your labor rate, markup and paint prices. Coatwright uses them on every job.</p></div>
+        <div class="card"><h3>Tap in the job</h3><p>Pick the property, tap rooms or enter the square footage. The price updates as you go.</p></div>
+        <div class="card"><h3>Send it</h3><p>Email, text or PDF a clean, itemized quote with your logo, right from the job site.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="trust">
+        <h2>Yours, private and dependable</h2>
+        <p class="sub">Your business data belongs to you.</p>
+        <div class="grid">
+          <div class="card"><div class="ic">🔒</div><h3>Stays on your phone</h3><p>Your customers, prices and profits are stored on your device. Nothing is sold or shared.</p></div>
+          <div class="card"><div class="ic">💾</div><h3>Backup anytime</h3><p>Save everything to a file in one tap and restore it on a new phone.</p></div>
+          <div class="card"><div class="ic">📶</div><h3>Works offline</h3><p>Bad signal at the job site? Coatwright still opens and prices the job.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap faq">
+      <h2>Questions</h2>
+      <p class="sub">&nbsp;</p>
+      <details><summary>Is it really free?</summary><p>Yes. Coatwright is free to use right now. Paid extras such as cloud sync are planned for later, and the core quoting will stay simple and affordable.</p></details>
+      <details><summary>Do I need to download anything or make an account?</summary><p>No. Open it in your phone's browser and start. To use it like an app, tap Share → "Add to Home Screen" on iPhone, or "Install app" on Android.</p></details>
+      <details><summary>Can I use my own prices?</summary><p>Yes. Set your labor rate, markup, minimum job, tax, deposit, paint and material costs, and how fast you work. Every quote uses your numbers.</p></details>
+      <details><summary>Where is my data stored?</summary><p>On your device. Make a backup from Settings now and then, especially before switching phones.</p></details>
+      <details><summary>Does it do commercial jobs?</summary><p>Yes: offices, retail, restaurants, medical, hotels, apartments, warehouses, schools, churches, gyms and more.</p></details>
+    </div>
+  </section>
+
+  <div class="wrap final">
+    <h2>Stop guessing. Start Coatwright.</h2>
+    <p class="sub">Your next quote could be in your customer's inbox in five minutes.</p>
+    <a class="btn" href="coatwright/">Start free →</a>
+  </div>
+
+  <div class="wrap">
+    <footer>
+      <span>© <span id="yr">2026</span> Coatwright</span>
+      <span>Made for painters, by people who respect the trade.</span>
+    </footer>
+  </div>
+  <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+</body>
+</html>

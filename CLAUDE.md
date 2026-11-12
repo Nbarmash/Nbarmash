@@ -1,6 +1,6 @@
 # Notes for Claude
 
-The Coatwright app lives in `coatwright/`. The root `README.md` is the owner's GitHub
+The Coatwright app lives in `coatwright/`. The public landing page is the root `index.html` (images in `landing/`). The root `README.md` is the owner's GitHub
 profile page: leave it alone.
 
 **Project tracking:** `coatwright/PROGRESS.md` is the step-by-step tracker. Read it at the

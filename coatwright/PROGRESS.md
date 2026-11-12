@@ -3,7 +3,7 @@
 **Goal:** The go-to quoting app for up-and-coming painters. Enter the job details, get an
 itemized price, send it to the customer. Free to start, paid plan later.
 
-**Where we are now:** Phase 1 is built, plus job types, full commercial list and quick estimate. **Coatwright is live** at https://nbarmash.github.io/Nbarmash/coatwright/ . Business tools, exterior and floors are built. **Next: merge so they go live, then test on your phone.**
+**Where we are now:** Live app at https://nbarmash.github.io/Nbarmash/coatwright/ (quoting, business tools, exterior & floors). Invoices/schedule/customers, cabinets & add-ons, the landing page and the video plan are built on the working branch. **Next: merge them so they go live; owner tests on a phone, grabs the domain/handles, and starts posting videos.**
 
 Legend: ✅ done · 🔄 in progress · ⬜ not started
 
@@ -33,7 +33,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ✅ Quick estimate from the total square footage (⚡ Quick / 📐 Room by room switch; quote says it's a ballpark)
 - ✅ Property type does not change pricing rules for now (owner: "everything else is good")
 
-## Phase 1c — Business tools (run the whole company, not just quotes) 🔄
+## Phase 1c — Business tools (run the whole company, not just quotes) ✅
 
 - ✅ Job status for every quote: Draft → Sent → Won → Scheduled → Completed → Paid (or Lost), with dates
 - ✅ Quotes auto-marked "Sent" when emailed, texted, copied or saved as PDF
@@ -46,9 +46,12 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ✅ Monthly money chart (with table view), residential vs commercial split, smart insights
 - ✅ Exports for the accountant (jobs, payments, expenses spreadsheets)
 - ✅ Backup & restore so history is never lost; data stays private on the device
-- ⬜ Merge to `main` so it goes live
+- ✅ Merged to `main` (pull request #2) and live
 - ⬜ Compare with bidbrush.pro feature by feature (owner to send screenshots; site is blocked from Claude's environment)
-- ⬜ Ideas next: customer list with job history, job photos, calendar view, invoices, deposit links
+- ✅ Invoices from any won job: invoice number, due date, payments received, balance due, "how to pay"; email/text/PDF/copy
+- ✅ Schedule: won jobs by start date with job length in days, late flags, and quick date-picking for unscheduled jobs
+- ✅ Customers: auto-built from quotes (matched by phone/email/name), repeat-customer badge, what each paid you, job history, call/text/email/map, "new quote for this customer", name autofill
+- ⬜ Ideas next: job photos, deposit links (needs online payments, Phase 4)
 
 ## Phase 2 — Get it online and in painters' hands 🔄
 
@@ -67,7 +70,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ✅ Exterior: whole-house exterior (home size, stories, siding type, condition; siding, trim & fascia, soffits), decks, fences, entry doors, garage doors, shutters
 - ✅ Floors: garage floor (1/2/3-car presets) with floor paint, epoxy or epoxy + flakes; basement and porch/patio floors; shop/warehouse floor for commercial
 - ✅ "Outside & floors" section works with both Quick and Room-by-room interior pricing; own prices and work speeds in Settings
-- ⬜ Cabinets and other common add-ons
+- ✅ Cabinets (kitchen & vanity: doors, drawers, boxes, spray vs brush, insides) and add-ons: wallpaper removal, popcorn ceiling removal (optional asbestos test), drywall repair
 - ⬜ Fixes from painter feedback
 
 ## Phase 4 — Start making money ⬜
@@ -77,14 +80,14 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ⬜ Deposit payments through Stripe
 - ⬜ Room scanning with the iPhone's LiDAR sensor (needs a native iPhone app; Pro models only) — premium feature
 - ⬜ Paid plan (e.g. free for 3 quotes/month, monthly fee for unlimited + logo)
-- ⬜ Simple landing page explaining the app
+- ✅ Landing page at https://nbarmash.github.io/Nbarmash/ (root `index.html`, screenshots in `landing/`); the app stays at `/coatwright/`
 
-## Phase 5 — Grow ⬜
+## Phase 5 — Grow 🔄
 
 - ⬜ Post in painter Facebook groups and subreddits
-- ⬜ Video plan: 20–30 scripts with hooks, captions and hashtags (TikTok, Reels, Shorts, Facebook)
-- ⬜ Real app demo videos recorded automatically (e.g. "quote a room in 60 seconds")
-- ⬜ AI-generated videos (job-site scenes, voiceover) made from the scripts
+- ✅ Video plan: 25 scripts with hooks, captions, hashtags, AI prompts and a 30-day schedule (`marketing/VIDEO_PLAN.md`)
+- ✅ First 2 real app demo videos recorded (`marketing/videos/`: quick quote, business stats); more on request
+- ⬜ AI-generated videos (job-site scenes, voiceover): prompts ready in the plan; owner generates them in an AI video tool
 - ⬜ Posting schedule: 1–3 videos a day, track which ones bring sign-ups
 - ⬜ Reach out to local paint supply stores
 - ⬜ Referral offer (free month for each painter referred)
@@ -108,6 +111,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 | 2026-11-13 | Profit counted when money is collected (payment dates); job costs count when the job is done | Matches how a small business sees cash; simple for the owner and accountant |
 | 2026-11-13 | Data stays on the device, with backup/restore and CSV exports | Private and free now; cloud sync comes with accounts in Phase 4 |
 | 2026-11-13 | Exterior estimated from home size + stories (no measuring needed); epoxy priced as a per-sq-ft kit | Fast on site, consistent with the quick-estimate approach; epoxy is bought as kits, not gallons |
+| 2026-11-13 | Landing page lives at the site root; app keeps its `/coatwright/` address | Home-screen installs keep working; a future coatwright.com can point at the landing page |
 | 2026-11-12 | Name: **BidBrush** (replaced) | Says what it does (bids) and who it's for (painters); short and works as a social handle |
 
 ## Log
@@ -133,3 +137,9 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
   accountant exports, backup/restore. 21 tests passing; full job lifecycle tested on a simulated iPhone.
 - **2026-11-13** — Added exterior (house, deck, fence, doors, garage doors, shutters) and floors (garage floor with paint/epoxy/flake,
   basement, porch). Fixed a paint-total bug caught by the new tests. 25 tests passing; tested on a simulated iPhone.
+- **2026-11-13** — Merged pull request #2 (business tools, exterior, floors); GitHub Pages redeployed.
+- **2026-11-13** — Owner chose next: invoices/schedule/customers, cabinets & add-ons, landing page, video plan.
+  Built invoices, schedule and customers. 27 tests passing; tested on a simulated iPhone.
+- **2026-11-13** — Added cabinets and specialty add-ons (section renamed "Exterior, floors & specialty"); fixed stepper buttons overflowing on narrow phones. 29 tests passing.
+- **2026-11-13** — Built the landing page with real app screenshots (sample data). Fixed stepper labels being cut off.
+- **2026-11-13** — Wrote the launch video plan and recorded 2 demo videos from the real app. Fixed negative money showing as "$-140".

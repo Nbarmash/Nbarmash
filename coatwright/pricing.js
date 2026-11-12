@@ -42,6 +42,8 @@
       'masking and full cleanup included. Any additional work will be quoted ' +
       'before it starts. Balance due on completion.',
     nextNumber: 1001,
+    invoiceDueDays: 7,    // 0 = due on receipt
+    paymentInstructions: '',
 
     // Exterior & floors
     extPaintPrice: 60,    // $ per gallon exterior paint
@@ -53,6 +55,10 @@
     floorRate: 150,       // sq ft of floor paint per hour, per coat
     epoxySqft: 1.0,       // $ per sq ft for a 2-part epoxy kit
     flakeSqft: 2.0,       // $ per sq ft for epoxy + flakes + clear coat
+
+    // Cabinets & specialty
+    cabinetPaintPrice: 80, // $ per gallon cabinet enamel/primer
+    cabinetDoorHours: 1.5, // hours per cabinet door (prep, prime, 2 coats, both sides)
   };
 
   var SIZES = {
@@ -366,16 +372,26 @@
   };
 
   var OUTSIDE_TYPES = [
-    { type: 'house', name: 'Whole House Exterior', commercialName: 'Building Exterior', icon: '🏡' },
-    { type: 'deck', name: 'Deck', icon: '🪵' },
-    { type: 'fence', name: 'Fence', icon: '🚧' },
-    { type: 'door', name: 'Entry Doors', icon: '🚪' },
-    { type: 'garagedoor', name: 'Garage Door', icon: '🚘' },
-    { type: 'shutters', name: 'Shutters', icon: '🪟' },
-    { type: 'floor', name: 'Garage Floor', commercialName: 'Shop / Warehouse Floor', icon: '🚗', size: '2', length: 20, width: 22,
+    { type: 'house', group: 'exterior', name: 'Whole House Exterior', commercialName: 'Building Exterior', icon: '🏡' },
+    { type: 'deck', group: 'exterior', name: 'Deck', icon: '🪵' },
+    { type: 'fence', group: 'exterior', name: 'Fence', icon: '🚧' },
+    { type: 'door', group: 'exterior', name: 'Entry Doors', icon: '🚪' },
+    { type: 'garagedoor', group: 'exterior', name: 'Garage Door', icon: '🚘' },
+    { type: 'shutters', group: 'exterior', name: 'Shutters', icon: '🪟' },
+    { type: 'floor', group: 'floor', name: 'Garage Floor', commercialName: 'Shop / Warehouse Floor', icon: '🚗', size: '2', length: 20, width: 22,
       commercialLength: 60, commercialWidth: 40 },
-    { type: 'floor', name: 'Basement Floor', icon: '🧱', size: 'custom', length: 30, width: 25 },
-    { type: 'floor', name: 'Porch / Patio Floor', icon: '🪑', size: 'custom', length: 12, width: 10 }
+    { type: 'floor', group: 'floor', name: 'Basement Floor', icon: '🧱', size: 'custom', length: 30, width: 25 },
+    { type: 'floor', group: 'floor', name: 'Porch / Patio Floor', icon: '🪑', size: 'custom', length: 12, width: 10 },
+    { type: 'cabinets', group: 'specialty', name: 'Kitchen Cabinets', icon: '🗄️', doors: 24, drawers: 10, boxes: 20 },
+    { type: 'cabinets', group: 'specialty', name: 'Bathroom Vanity', icon: '🚰', doors: 4, drawers: 3, boxes: 5 },
+    { type: 'wallpaper', group: 'specialty', name: 'Wallpaper Removal', icon: '🧻' },
+    { type: 'popcorn', group: 'specialty', name: 'Popcorn Ceiling Removal', icon: '🍿' },
+    { type: 'drywall', group: 'specialty', name: 'Drywall Repair', icon: '🩹' }
+  ];
+  var OUTSIDE_GROUPS = [
+    ['exterior', 'Exterior'],
+    ['floor', 'Floors'],
+    ['specialty', 'Cabinets & specialty']
   ];
 
   function newOutside(t, job) {
@@ -392,6 +408,11 @@
       case 'door': return Object.assign(base, { count: 1 });
       case 'garagedoor': return Object.assign(base, { count: 1, size: 'double' });
       case 'shutters': return Object.assign(base, { count: 4 });
+      case 'cabinets': return Object.assign(base, { doors: t.doors, drawers: t.drawers, boxes: t.boxes,
+        method: 'spray', insides: false });
+      case 'wallpaper': return Object.assign(base, { sqft: 400 });
+      case 'popcorn': return Object.assign(base, { sqft: homeSqft > 3000 ? 1000 : 400, retexture: 'smooth', test: 1 });
+      case 'drywall': return Object.assign(base, { small: 4, large: 1 });
       case 'floor': return Object.assign(base, { system: 'epoxy', coats: 2,
         size: commercial && t.commercialLength ? 'custom' : t.size,
         length: commercial && t.commercialLength ? t.commercialLength : t.length,
@@ -510,6 +531,48 @@
       summary = num(item.length) + '×' + num(item.width) + ' ft, ' + (FLOOR_SYSTEMS[sys] || FLOOR_SYSTEMS.epoxy).label.toLowerCase();
     }
 
+    else if (item.type === 'cabinets') {
+      var cd = Math.round(num(item.doors)), cdr = Math.round(num(item.drawers)), cb = num(item.boxes);
+      var spray = item.method !== 'brush';
+      var mf = (spray ? 0.85 : 1) * cond.labor;
+      var ins = item.insides ? 1.35 : 1;
+      if (cd + cdr + cb > 0) {
+        add('cabprep', 'Remove, label & degrease', 'Doors, drawers, hardware', (cd + cdr) * 0.15 + 1);
+        if (cd) add('cabdoors', 'Cabinet doors', cd + ' doors · both sides · prime + 2 coats', cd * num(s.cabinetDoorHours, 1.5) * mf);
+        if (cdr) add('cabdrawers', 'Drawer fronts', cdr + ' drawers · prime + 2 coats', cdr * 0.6 * mf);
+        if (cb) add('cabboxes', 'Cabinet boxes & face frames', fmt(cb) + ' linear ft' + (item.insides ? ' · inside & out' : ''), cb * 0.75 * mf * ins);
+        add('cabreinstall', 'Reinstall & adjust', 'Hinges, hardware, touch-ups', (cd + cdr) * 0.1 + 1);
+        gallons.cabinet = (gallons.cabinet || 0) + cd * 0.12 + cdr * 0.05 + cb * 0.06 * ins;
+      }
+      summary = cd + ' doors, ' + cdr + ' drawers, ' + fmt(cb) + ' ft of boxes · ' + (spray ? 'sprayed' : 'brushed & rolled');
+    } else if (item.type === 'wallpaper') {
+      var wp = num(item.sqft);
+      if (wp > 0) {
+        add('wpremove', 'Wallpaper removal', fmt(wp) + ' sq ft · score, steam & strip', wp / 40 * cond.labor);
+        add('wpskim', 'Wash glue, patch & prime walls', fmt(wp) + ' sq ft', wp / 150);
+        direct.push({ key: 'wpsupplies', label: 'Wallpaper remover & glue wash', sqft: wp, cost: round2(wp * 0.1) });
+        gallons.primer += wp / 300;
+      }
+      summary = fmt(wp) + ' sq ft of wallpaper';
+    } else if (item.type === 'popcorn') {
+      var pc = num(item.sqft);
+      if (pc > 0) {
+        add('pcprotect', 'Protect room (plastic floors & walls)', fmt(pc) + ' sq ft', pc / 250 + 1);
+        add('pcscrape', 'Wet & scrape popcorn texture', fmt(pc) + ' sq ft', pc / 60);
+        add('pcfinish', item.retexture === 'knockdown' ? 'Skim & knockdown texture' : 'Skim coat smooth & sand', fmt(pc) + ' sq ft',
+          pc / (item.retexture === 'knockdown' ? 120 : 80));
+        direct.push({ key: 'pcsupplies', label: 'Joint compound, plastic & sanding', sqft: pc, cost: round2(pc * 0.25) });
+        if (Math.round(num(item.test)) === 1) direct.push({ key: 'asbestos', label: 'Asbestos test (lab)', sqft: 0, cost: 75 });
+      }
+      summary = fmt(pc) + ' sq ft ceiling, ' + (item.retexture === 'knockdown' ? 'knockdown finish' : 'smooth finish');
+    } else if (item.type === 'drywall') {
+      var ds = Math.round(num(item.small)), dl = Math.round(num(item.large));
+      if (ds) add('dwsmall', 'Small drywall repairs', ds + ' × nail pops, dents, holes up to 6"', ds * 0.5);
+      if (dl) add('dwlarge', 'Large drywall patches', dl + ' × holes over 6" · mesh/backer, 3 coats', dl * 1.75);
+      if (ds + dl) direct.push({ key: 'drywall', label: 'Drywall patch materials', sqft: 0, cost: ds * 4 + dl * 15 });
+      summary = ds + ' small, ' + dl + ' large';
+    }
+
     var hours = 0, laborCost = 0;
     lines.forEach(function (l) { hours += l.hours; laborCost += l.laborCost; });
     return { lines: lines, gallons: gallons, direct: direct, summary: summary,
@@ -522,7 +585,7 @@
     var mk = 1 + num(s.markup) / 100;
     var quickMode = job.mode === 'quick';
 
-    var totalGallons = { wall: 0, ceiling: 0, trim: 0, primer: 0, ext: 0, stain: 0, floor: 0 };
+    var totalGallons = { wall: 0, ceiling: 0, trim: 0, primer: 0, ext: 0, stain: 0, floor: 0, cabinet: 0 };
     var directTotals = {};
     var source = quickMode
       ? [{ id: 'quick', name: job.jobType === 'commercial' ? 'Whole space' : 'Whole home', quick: true }]
@@ -559,7 +622,8 @@
       ['primer', 'Primer', s.primerPrice],
       ['ext', 'Exterior paint', s.extPaintPrice],
       ['stain', 'Deck & fence stain', s.stainPrice],
-      ['floor', 'Floor paint', s.floorPaintPrice]
+      ['floor', 'Floor paint', s.floorPaintPrice],
+      ['cabinet', 'Cabinet primer & enamel', s.cabinetPaintPrice]
     ];
     var materials = [];
     var paintCost = 0;
@@ -575,7 +639,7 @@
     Object.keys(directTotals).forEach(function (k) {
       var d = directTotals[k];
       var dc = round2(d.cost);
-      materials.push({ key: k, label: d.label, detail: Math.round(d.sqft).toLocaleString('en-US') + ' sq ft kit',
+      materials.push({ key: k, label: d.label, detail: d.sqft ? Math.round(d.sqft).toLocaleString('en-US') + ' sq ft' : '',
         qty: 1, cost: dc, price: round2(dc * mk) });
     });
     if (paintCost > 0 && num(s.suppliesPct) > 0) {
@@ -652,6 +716,7 @@
     newRoom: newRoom,
     newQuick: newQuick,
     OUTSIDE_TYPES: OUTSIDE_TYPES,
+    OUTSIDE_GROUPS: OUTSIDE_GROUPS,
     SIDING: SIDING,
     FLOOR_SYSTEMS: FLOOR_SYSTEMS,
     GARAGE_SIZES: GARAGE_SIZES,

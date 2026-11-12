@@ -249,6 +249,75 @@
     return toCsv(rows);
   }
 
+  // ---------- Customers ----------
+  /** Same person across jobs: phone digits, else email, else name. */
+  function customerKey(c) {
+    c = c || {};
+    var digits = String(c.phone || '').replace(/\D/g, '');
+    if (digits.length >= 7) return 'p' + digits.slice(-10);
+    if (c.email && String(c.email).trim()) return 'e' + String(c.email).trim().toLowerCase();
+    var name = String(c.name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    return name ? 'n' + name : '';
+  }
+
+  /** Everyone you've quoted, with their jobs and what they've paid you. */
+  function customersFrom(jobs, settings) {
+    var map = {};
+    (jobs || []).forEach(function (j) {
+      var key = customerKey(j.customer);
+      if (!key) return;
+      var c = map[key] || (map[key] = { key: key, name: '', phone: '', email: '', address: '', jobs: [],
+        quoted: 0, collected: 0, won: 0, lastDate: 0 });
+      // keep the most recent non-empty contact details
+      var newer = (j.updatedAt || 0) >= c.lastDate;
+      ['name', 'phone', 'email', 'address'].forEach(function (f) {
+        var v = j.customer && j.customer[f];
+        if (v && (newer || !c[f])) c[f] = v;
+      });
+      c.jobs.push(j);
+      c.quoted += Pricing.calcJob(j, settings).total;
+      c.collected += paidAmount(j);
+      if (isWon(j)) c.won++;
+      c.lastDate = Math.max(c.lastDate, j.updatedAt || j.createdAt || 0);
+    });
+    return Object.keys(map).map(function (k) {
+      var c = map[k];
+      c.quoted = round2(c.quoted);
+      c.collected = round2(c.collected);
+      c.jobs.sort(function (a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); });
+      return c;
+    }).sort(function (a, b) { return b.lastDate - a.lastDate; });
+  }
+
+  // ---------- Schedule ----------
+  /** Days on site for one painter: estimated (or logged) hours ÷ 8, rounded up. */
+  function jobDays(job, settings) {
+    var a = job.actuals || {};
+    var h = has(a.hours) ? num(a.hours) : Pricing.calcJob(job, settings).internal.hours;
+    return Math.max(1, Math.ceil(h / 8));
+  }
+
+  /** Won jobs on the calendar, plus won jobs still waiting for a start date. */
+  function schedule(jobs, settings, todayIso) {
+    var items = [], unscheduled = [];
+    (jobs || []).forEach(function (j) {
+      var st = statusOf(j);
+      if (st !== 'won' && st !== 'scheduled' && st !== 'completed') return;
+      if (!j.startDate) {
+        if (st !== 'completed') unscheduled.push(j);
+        return;
+      }
+      if (st === 'completed' && j.startDate < todayIso) return;
+      var days = jobDays(j, settings);
+      var end = new Date(j.startDate + 'T12:00:00');
+      end.setDate(end.getDate() + days - 1);
+      items.push({ job: j, start: j.startDate, end: isoDate(end.getTime()), days: days,
+        late: st !== 'completed' && isoDate(end.getTime()) < todayIso });
+    });
+    items.sort(function (a, b) { return a.start < b.start ? -1 : a.start > b.start ? 1 : 0; });
+    return { items: items, unscheduled: unscheduled };
+  }
+
   var api = {
     STATUSES: STATUSES,
     WON_STATUSES: WON_STATUSES,
@@ -267,7 +336,11 @@
     yearStats: yearStats,
     jobsCsv: jobsCsv,
     paymentsCsv: paymentsCsv,
-    expensesCsv: expensesCsv
+    expensesCsv: expensesCsv,
+    customerKey: customerKey,
+    customersFrom: customersFrom,
+    jobDays: jobDays,
+    schedule: schedule
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

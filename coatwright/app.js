@@ -21,7 +21,7 @@
   var settings = Object.assign({}, P.DEFAULT_SETTINGS, load('pq.settings', {}));
   var jobs = load('pq.jobs', []);
   var expenses = load('pq.expenses', []);
-  var homeFilter = 'all', homeSearch = '';
+  var homeFilter = 'all', homeSearch = '', customerSearch = '', pendingCustomer = null;
 
   function saveSettings() { save('pq.settings', settings); }
   function saveJobs() { save('pq.jobs', jobs); }
@@ -36,10 +36,12 @@
     });
   }
   function money(n) {
-    return '$' + (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    var v = Number(n) || 0;
+    return (v < 0 ? '−$' : '$') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
   function money0(n) {
-    return '$' + Math.round(Number(n) || 0).toLocaleString('en-US');
+    var v = Math.round(Number(n) || 0);
+    return (v < 0 ? '−$' : '$') + Math.abs(v).toLocaleString('en-US');
   }
   function fmtDate(ts) {
     return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -74,7 +76,7 @@
       propertyType: propertyType,
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      customer: { name: '', phone: '', email: '', address: '' },
+      customer: pendingCustomer || { name: '', phone: '', email: '', address: '' },
       rooms: [],
       quick: P.newQuick((P.findProperty(jobType, propertyType) || {}).height),
       extras: [],
@@ -85,6 +87,7 @@
       payments: [],
       actuals: {}
     };
+    pendingCustomer = null;
     settings.nextNumber = (Number(settings.nextNumber) || 1000) + 1;
     saveSettings();
     jobs.unshift(job);
@@ -99,9 +102,13 @@
     var id = parts[1];
     var job = id ? findJob(id) : null;
     document.body.dataset.view = view;
-    if ((view === 'job' || view === 'quote') && !job) { location.hash = '#/'; return; }
+    if ((view === 'job' || view === 'quote' || view === 'invoice') && !job) { location.hash = '#/'; return; }
     if (view === 'job') renderJob(job);
     else if (view === 'quote') renderQuote(job);
+    else if (view === 'invoice') renderInvoice(job);
+    else if (view === 'schedule') renderSchedule();
+    else if (view === 'customers') renderCustomers();
+    else if (view === 'customer') renderCustomer(decodeURIComponent(id || ''));
     else if (view === 'new') renderNewJob(P.JOB_TYPES[id] ? id : null);
     else if (view === 'settings') renderSettings();
     else if (view === 'stats') renderStats(+id || new Date().getFullYear());
@@ -369,7 +376,8 @@
       '<div class="label">What the job really cost</div>' +
       '<div class="row2">' + costField('hours', 'Hours worked', 'hrs', 'e.g. 24') + costField('materials', 'Paint & materials', '$', 'from receipts') + '</div>' +
       '<div class="row2">' + costField('crew', 'Crew / helper pay', '$', '0') + costField('other', 'Other job costs', '$', '0') + '</div>' +
-      '<div data-out="result">' + resultBox(job) + '</div></section>';
+      '<div data-out="result">' + resultBox(job) + '</div>' +
+      '<a class="btn full" href="#/invoice/' + job.id + '">🧾 Create invoice</a></section>';
   }
 
   // ---------- Outside & floors ----------
@@ -430,6 +438,27 @@
           '<div class="label">Size</div>' + oSeg(i, 'size', item.size, [['single', 'Single'], ['double', 'Double']]) +
           '<div class="label">Coats</div>' + oSeg(i, 'coats', item.coats, COATS_12);
         break;
+      case 'cabinets':
+        body = '<div class="row2">' + oStep(i, 'doors', item.doors, 'Doors') + oStep(i, 'drawers', item.drawers, 'Drawers') + '</div>' +
+          '<div class="dims two">' + oNum(i, 'boxes', item.boxes, 'Cabinet boxes', 'linear ft') + '</div>' +
+          '<div class="label">Method</div>' + oSeg(i, 'method', item.method, [['spray', 'Spray'], ['brush', 'Brush & roll']]) +
+          '<div class="label">Paint the insides too?</div>' + oSeg(i, 'insides', item.insides ? 1 : 0, [[0, 'Outside only'], [1, 'Inside & out']]) +
+          '<div class="label">Condition</div>' + oSeg(i, 'condition', item.condition, [['good', 'Good'], ['fair', 'Greasy / worn'], ['poor', 'Damaged']]);
+        break;
+      case 'wallpaper':
+        body = '<div class="dims two">' + oNum(i, 'sqft', item.sqft, 'Wallpaper area', 'sq ft') + '</div>' +
+          '<p class="muted small">Tip: wall length × height for each papered wall.</p>' +
+          '<div class="label">How stubborn?</div>' + oSeg(i, 'condition', item.condition, [['good', 'Peels easily'], ['fair', 'Average'], ['poor', 'Multiple layers']]);
+        break;
+      case 'popcorn':
+        body = '<div class="dims two">' + oNum(i, 'sqft', item.sqft, 'Ceiling area', 'sq ft') + '</div>' +
+          '<div class="label">New finish</div>' + oSeg(i, 'retexture', item.retexture, [['smooth', 'Smooth'], ['knockdown', 'Knockdown']]) +
+          '<div class="label">Asbestos test</div>' + oSeg(i, 'test', item.test, [[1, 'Include ($75)'], [0, 'Not needed']]) +
+          '<p class="muted small">⚠️ Homes built before 1980 should be tested before scraping.</p>';
+        break;
+      case 'drywall':
+        body = oStep(i, 'small', item.small, 'Small (up to 6")') + oStep(i, 'large', item.large, 'Large (over 6")');
+        break;
       case 'floor':
         var garage = /garage/i.test(item.name);
         body = (garage ? '<div class="label">Garage size</div><div class="chips">' + Object.keys(P.GARAGE_SIZES).concat('custom').map(function (k) {
@@ -470,7 +499,8 @@
       statusCard(job) +
 
       '<section class="card"><h2 class="card-title"><span class="step">1</span> Customer</h2>' +
-      '<label class="field"><span>' + (commercial ? 'Business / contact name' : 'Name') + '</span><input data-field="customer.name" value="' + esc(cu.name) +
+      '<datalist id="cust-names">' + S.customersFrom(jobs, settings).map(function (c) { return '<option value="' + esc(c.name) + '">'; }).join('') + '</datalist>' +
+      '<label class="field"><span>' + (commercial ? 'Business / contact name' : 'Name') + '</span><input list="cust-names" data-field="customer.name" value="' + esc(cu.name) +
       '" placeholder="' + (commercial ? 'Acme Dental — Dr. Lee' : 'Jane Smith') + '" autocomplete="off"></label>' +
       '<label class="field"><span>Address</span><input data-field="customer.address" value="' + esc(cu.address) + '" placeholder="123 Main St" autocomplete="off"></label>' +
       '<div class="row2"><label class="field"><span>Phone</span><input type="tel" data-field="customer.phone" value="' + esc(cu.phone) + '" placeholder="(555) 555-5555"></label>' +
@@ -490,13 +520,15 @@
           '<div class="room-types">' + moreTypes.join('') + '</div></details>' : '') +
         '</section>') +
 
-      '<h2 class="section-title"><span class="step">3</span> Outside & floors <em class="muted small">(optional)</em></h2>' +
+      '<h2 class="section-title"><span class="step">3</span> Exterior, floors & specialty <em class="muted small">(optional)</em></h2>' +
       job.outside.map(function (it, i) { return outsideCard(it, i, calc.outside[i]); }).join('') +
-      '<section class="card add-room"><div class="label">' + (job.outside.length ? 'Add more' : 'Exterior, deck, fence, garage floor…') + '</div>' +
-      '<div class="room-types">' + P.OUTSIDE_TYPES.map(function (t, k) {
-        var nm = (commercial && t.commercialName) || t.name;
-        return '<button type="button" data-action="add-out" data-k="' + k + '"><span>' + t.icon + '</span>' + esc(nm) + '</button>';
-      }).join('') + '</div></section>' +
+      '<section class="card add-room">' + P.OUTSIDE_GROUPS.map(function (g) {
+        return '<div class="label">' + g[1] + '</div><div class="room-types">' + P.OUTSIDE_TYPES.map(function (t, k) {
+          if (t.group !== g[0]) return '';
+          var nm = (commercial && t.commercialName) || t.name;
+          return '<button type="button" data-action="add-out" data-k="' + k + '"><span>' + t.icon + '</span>' + esc(nm) + '</button>';
+        }).join('') + '</div>';
+      }).join('') + '</section>' +
 
       '<details class="card"' + (job.extras.length || job.discount || job.notes ? ' open' : '') + '><summary class="card-title"><span class="step">4</span> Extras, discount & notes <em class="muted small">(optional)</em></summary>' +
       job.extras.map(function (e, i) {
@@ -553,8 +585,17 @@
       '<td class="amt">' + amount + '</td></tr>';
   }
 
-  function quoteDocument(job, q) {
-    var s = settings, cu = job.customer;
+  function invoiceNumber(job) { return String(job.number || '').replace(/^Q-/, 'INV-'); }
+  function invoiceDue(job) {
+    var days = Number(settings.invoiceDueDays) || 0;
+    if (!days) return 'Due on receipt';
+    var d = new Date((job.invoiceDate || today()) + 'T12:00:00');
+    d.setDate(d.getDate() + days);
+    return 'Due ' + fmtDate(d.getTime());
+  }
+
+  function quoteDocument(job, q, kind) {
+    var s = settings, cu = job.customer, inv = kind === 'invoice';
     var valid = new Date(job.updatedAt + (Number(s.validDays) || 30) * 864e5);
     var rows = '';
     q.rooms.concat(q.outside || []).forEach(function (r) {
@@ -576,8 +617,16 @@
     if (q.discount) totals += lineRow('Discount', '', '−' + money(q.discount), 'sub');
     if (q.minimumAdj) totals += lineRow('Minimum job charge', '', money(q.minimumAdj), 'sub');
     if (q.tax) totals += lineRow('Tax (' + s.taxRate + '%)', '', money(q.tax), 'sub');
-    totals += lineRow('Total', '', money(q.total), 'grand');
-    if (q.deposit) totals += lineRow('Deposit to book (' + s.depositPct + '%)', '', money(q.deposit), 'sub');
+    if (inv) {
+      totals += lineRow('Total', '', money(q.total), 'sub strong');
+      (job.payments || []).forEach(function (p) {
+        totals += lineRow('Paid ' + fmtShort(p.date) + (p.method ? ' · ' + p.method : ''), '', '−' + money(p.amount), 'sub');
+      });
+      totals += lineRow('Balance due', '', money(Math.max(0, q.total - S.paidAmount(job))), 'grand');
+    } else {
+      totals += lineRow('Total', '', money(q.total), 'grand');
+      if (q.deposit) totals += lineRow('Deposit to book (' + s.depositPct + '%)', '', money(q.deposit), 'sub');
+    }
 
     var biz = [s.ownerName, s.phone, s.email, s.website].filter(Boolean).map(esc).join('<br>');
 
@@ -585,26 +634,34 @@
       '<header class="doc-head"><div class="doc-biz">' +
       (s.logo ? '<img src="' + esc(s.logo) + '" alt="" class="logo">' : '') +
       '<div><div class="doc-bizname">' + esc(s.businessName || 'Your Painting Co.') + '</div><div class="muted small">' + biz + '</div></div></div>' +
-      '<div class="doc-meta"><div class="doc-title">ESTIMATE</div><div>' + esc(job.number) + '</div>' +
-      '<div class="muted small">' + fmtDate(job.updatedAt) + '<br>Valid until ' + fmtDate(valid) + '</div></div></header>' +
-      '<div class="doc-to"><div><div class="label">Prepared for</div><strong>' + esc(cu.name || '—') + '</strong>' +
+      (inv
+        ? '<div class="doc-meta"><div class="doc-title">INVOICE</div><div>' + esc(invoiceNumber(job)) + '</div>' +
+          '<div class="muted small">' + fmtDate(new Date((job.invoiceDate || today()) + 'T12:00:00').getTime()) + '<br>' + invoiceDue(job) + '</div></div></header>'
+        : '<div class="doc-meta"><div class="doc-title">ESTIMATE</div><div>' + esc(job.number) + '</div>' +
+          '<div class="muted small">' + fmtDate(job.updatedAt) + '<br>Valid until ' + fmtDate(valid) + '</div></div></header>') +
+      '<div class="doc-to"><div><div class="label">' + (inv ? 'Bill to' : 'Prepared for') + '</div><strong>' + esc(cu.name || '—') + '</strong>' +
       '<div class="muted small">' + [cu.address, cu.phone, cu.email].filter(Boolean).map(esc).join('<br>') + '</div></div>' +
       (P.propertyLabel(job) ? '<div><div class="label">Property</div><strong>' + esc(P.propertyLabel(job)) + '</strong></div>' : '') + '</div>' +
       '<table class="lines"><tbody>' + (rows || '<tr><td class="muted">Add rooms to build the estimate.</td><td></td></tr>') + '</tbody>' +
       '<tfoot>' + totals + '</tfoot></table>' +
-      (q.quick ? '<div class="doc-notes"><b>' + esc(QUICK_NOTE) + '</b></div>' : '') +
-      (job.notes ? '<div class="doc-notes"><div class="label">Notes</div>' + esc(job.notes).replace(/\n/g, '<br>') + '</div>' : '') +
-      (s.terms ? '<div class="doc-terms">' + esc(s.terms) + '</div>' : '') +
-      '<div class="doc-sign"><div>Customer signature</div><div>Date</div></div>' +
-      '<div class="doc-made">Estimate made with Coatwright</div>' +
+      (inv
+        ? (s.paymentInstructions ? '<div class="doc-notes"><div class="label">How to pay</div>' + esc(s.paymentInstructions).replace(/\n/g, '<br>') + '</div>' : '') +
+          '<div class="doc-notes"><b>Thank you for your business!</b></div>' +
+          '<div class="doc-made">Invoice made with Coatwright</div>'
+        : (q.quick ? '<div class="doc-notes"><b>' + esc(QUICK_NOTE) + '</b></div>' : '') +
+          (job.notes ? '<div class="doc-notes"><div class="label">Notes</div>' + esc(job.notes).replace(/\n/g, '<br>') + '</div>' : '') +
+          (s.terms ? '<div class="doc-terms">' + esc(s.terms) + '</div>' : '') +
+          '<div class="doc-sign"><div>Customer signature</div><div>Date</div></div>' +
+          '<div class="doc-made">Estimate made with Coatwright</div>') +
       '</article>';
   }
 
-  function quoteText(job, q) {
-    var s = settings, cu = job.customer, out = [];
+  function quoteText(job, q, kind) {
+    var s = settings, cu = job.customer, out = [], inv = kind === 'invoice';
     var pad = function (label, amt) { return label + ': ' + amt; };
     out.push('Hi ' + (cu.name ? cu.name.split(' ')[0] : 'there') + ',', '');
-    out.push('Thank you for the opportunity! Here is your painting estimate (' + job.number + ').');
+    out.push(inv ? 'Thank you for choosing us! Here is your invoice (' + invoiceNumber(job) + '). ' + invoiceDue(job) + '.'
+      : 'Thank you for the opportunity! Here is your painting estimate (' + job.number + ').');
     if (P.propertyLabel(job)) out.push('Property: ' + P.propertyLabel(job) + (cu.address ? ' — ' + cu.address : ''));
     out.push('');
     q.rooms.concat(q.outside || []).forEach(function (r) {
@@ -627,15 +684,23 @@
     if (q.discount) out.push(pad('Discount', '-' + money(q.discount)));
     if (q.minimumAdj) out.push(pad('Minimum job charge', money(q.minimumAdj)));
     if (q.tax) out.push(pad('Tax', money(q.tax)));
-    out.push(pad('TOTAL', money(q.total)));
-    if (q.deposit) out.push(pad('Deposit to book', money(q.deposit)));
-    out.push('');
-    if (q.quick) out.push(QUICK_NOTE, '');
-    if (job.notes) out.push('Notes: ' + job.notes, '');
-    if (s.terms) out.push(s.terms, '');
-    out.push('Reply to this email to accept or with any questions.', '');
+    if (inv) {
+      out.push(pad('Total', money(q.total)));
+      (job.payments || []).forEach(function (p) { out.push(pad('Paid ' + p.date + (p.method ? ' (' + p.method + ')' : ''), '-' + money(p.amount))); });
+      out.push(pad('BALANCE DUE', money(Math.max(0, q.total - S.paidAmount(job)))), '');
+      if (s.paymentInstructions) out.push('How to pay: ' + s.paymentInstructions, '');
+      out.push('Thank you for your business!', '');
+    } else {
+      out.push(pad('TOTAL', money(q.total)));
+      if (q.deposit) out.push(pad('Deposit to book', money(q.deposit)));
+      out.push('');
+      if (q.quick) out.push(QUICK_NOTE, '');
+      if (job.notes) out.push('Notes: ' + job.notes, '');
+      if (s.terms) out.push(s.terms, '');
+      out.push('Reply to this email to accept or with any questions.', '');
+    }
     out.push([s.ownerName, s.businessName, s.phone, s.email].filter(Boolean).join('\n'));
-    out.push('', '—', 'Estimate made with Coatwright');
+    out.push('', '—', (inv ? 'Invoice' : 'Estimate') + ' made with Coatwright');
     return out.join('\n');
   }
 
@@ -662,6 +727,109 @@
       stat('Profit', money0(i.profit)) + stat('Margin', i.margin + '%') +
       '</div><div class="muted small">Exact paint needed (gal): ' + esc(gal) + '</div></section>';
   }
+  // ---------- Invoice ----------
+  function renderInvoice(job) {
+    if (!job.invoiceDate) { job.invoiceDate = today(); saveJobs(); }
+    var q = P.calcJob(job, settings);
+    var due = Math.max(0, q.total - S.paidAmount(job));
+    app.innerHTML =
+      '<div class="page-head no-print"><a href="#/job/' + job.id + '" class="back">‹ Job</a><span class="muted">' + esc(invoiceNumber(job)) + '</span></div>' +
+      '<div class="actions no-print">' +
+      '<button class="btn btn-primary" data-action="email">✉️ Email</button>' +
+      '<button class="btn" data-action="share">💬 Text / Share</button>' +
+      '<button class="btn" data-action="print">📄 Save PDF</button>' +
+      '<button class="btn" data-action="copy">📋 Copy</button></div>' +
+      (!settings.paymentInstructions ? '<a class="setup-banner no-print" href="#/settings"><span>💡</span><div><strong>Add how customers can pay you</strong>' +
+        '<div class="small">e.g. "Zelle 555-123-4567 or checks to Smith Painting". Shows on every invoice.</div></div><span>›</span></a>' : '') +
+      quoteDocument(job, q, 'invoice') +
+      (due === 0 ? '<p class="muted center-text no-print">✅ Paid in full</p>' : '');
+  }
+
+  // ---------- Schedule ----------
+  function fmtRange(a, b) {
+    return a === b ? fmtShort(a) : fmtShort(a) + ' – ' + fmtShort(b);
+  }
+  function renderSchedule() {
+    var t = today();
+    var sch = S.schedule(jobs, settings, t);
+    var weekEnd = new Date(); weekEnd.setDate(weekEnd.getDate() + 7);
+    var weekIso = S.isoDate(weekEnd.getTime());
+    var groups = [['Happening now & late', function (x) { return x.start <= t; }],
+      ['Next 7 days', function (x) { return x.start > t && x.start <= weekIso; }],
+      ['Later', function (x) { return x.start > weekIso; }]];
+    var card = function (x) {
+      var j = x.job, cu = j.customer;
+      return '<a class="job-card sched" href="#/job/' + j.id + '"><div class="sched-date"><b>' + esc(fmtShort(x.start).split(' ')[0]) + '</b>' +
+        '<span>' + esc(fmtShort(x.start).split(' ')[1] || '') + '</span></div>' +
+        '<div class="job-main"><strong>' + esc(cu.name || 'Customer') + '</strong>' +
+        '<div class="muted small">' + esc(fmtRange(x.start, x.end)) + ' · ' + x.days + (x.days === 1 ? ' day' : ' days') + (cu.address ? ' · ' + esc(cu.address) : '') + '</div>' +
+        '<div class="job-tags">' + statusPill(j) + (x.late ? '<span class="pill late">⚠️ Past end date</span>' : '') + '</div></div>' +
+        '<div class="job-right"><div class="job-total">' + money0(P.calcJob(j, settings).total) + '</div></div></a>';
+    };
+    var body = groups.map(function (g) {
+      var list = sch.items.filter(g[1]);
+      return list.length ? '<h2 class="section-title">' + g[0] + '</h2>' + list.map(card).join('') : '';
+    }).join('');
+    app.innerHTML =
+      '<div class="page-head"><a href="#/" class="back">‹ Jobs</a><span class="muted small">Schedule</span></div>' +
+      (sch.unscheduled.length ? '<section class="card"><h2 class="card-title">📌 Won jobs without a start date</h2>' +
+        sch.unscheduled.map(function (j) {
+          return '<div class="unsched"><a href="#/job/' + j.id + '"><strong>' + esc(j.customer.name || j.number) + '</strong>' +
+            '<span class="muted small"> · ' + money0(P.calcJob(j, settings).total) + ' · ~' + S.jobDays(j, settings) + ' days</span></a>' +
+            '<input type="date" data-schedule="' + j.id + '" aria-label="Start date for ' + esc(j.customer.name || j.number) + '"></div>';
+        }).join('') + '<p class="muted small">Pick a date and the job moves onto your schedule.</p></section>' : '') +
+      (body || '<div class="empty"><div class="empty-icon">📅</div><p>Nothing scheduled yet.</p>' +
+        '<p class="muted small">Mark a job as <b>Won</b> or <b>Scheduled</b> and give it a start date. It shows up here with how many days it takes.</p></div>');
+  }
+
+  // ---------- Customers ----------
+  function renderCustomers() {
+    var all = S.customersFrom(jobs, settings);
+    var q = customerSearch.trim().toLowerCase();
+    var list = all.filter(function (c) {
+      return !q || [c.name, c.phone, c.email, c.address].join(' ').toLowerCase().indexOf(q) !== -1;
+    });
+    var lifetime = all.reduce(function (a, c) { return a + c.collected; }, 0);
+    var repeat = all.filter(function (c) { return c.won > 1; }).length;
+    app.innerHTML =
+      '<div class="page-head"><a href="#/" class="back">‹ Jobs</a><span class="muted small">Customers</span></div>' +
+      (all.length ? '<section class="card"><div class="stats">' + stat('Customers', all.length) + stat('Repeat customers', repeat) +
+        stat('Collected (all time)', money0(lifetime)) + '</div></section>' +
+        '<input type="search" class="search" data-customer-search placeholder="Search customers…" value="' + esc(customerSearch) + '">' : '') +
+      '<div id="cust-list">' + (list.length ? list.map(function (c) {
+        return '<a class="job-card" href="#/customer/' + encodeURIComponent(c.key) + '"><div class="job-main"><strong>' + esc(c.name || 'Customer') + '</strong>' +
+          '<div class="muted small">' + esc(c.address || c.phone || c.email || '') + '</div>' +
+          '<div class="job-tags"><span class="tag">' + c.jobs.length + (c.jobs.length === 1 ? ' job' : ' jobs') + '</span>' +
+          (c.won > 1 ? '<span class="pill st-paid">⭐ Repeat</span>' : '') + '</div></div>' +
+          '<div class="job-right"><div class="job-total">' + money0(c.collected) + '</div><div class="muted small">paid you</div></div></a>';
+      }).join('') : '<div class="empty"><div class="empty-icon">👥</div><p>' + (all.length ? 'No customers match.' : 'No customers yet.') + '</p>' +
+        (all.length ? '' : '<p class="muted small">Everyone you quote is saved here automatically, with their job history.</p>') + '</div>') + '</div>';
+  }
+
+  function renderCustomer(key) {
+    var c = S.customersFrom(jobs, settings).find(function (x) { return x.key === key; });
+    if (!c) { location.hash = '#/customers'; return; }
+    var digits = String(c.phone || '').replace(/[^\d+]/g, '');
+    app.innerHTML =
+      '<div class="page-head"><a href="#/customers" class="back">‹ Customers</a><span class="muted small">' + c.jobs.length + ' jobs</span></div>' +
+      '<section class="card"><h2 class="card-title" style="font-size:22px">' + esc(c.name || 'Customer') + '</h2>' +
+      '<div class="muted">' + [c.address, c.phone, c.email].filter(Boolean).map(esc).join('<br>') + '</div>' +
+      '<div class="contact-row">' +
+      (digits ? '<a class="btn" href="tel:' + esc(digits) + '">📞 Call</a><a class="btn" href="sms:' + esc(digits) + '">💬 Text</a>' : '') +
+      (c.email ? '<a class="btn" href="mailto:' + esc(c.email) + '">✉️ Email</a>' : '') +
+      (c.address ? '<a class="btn" target="_blank" rel="noopener" href="https://maps.google.com/?q=' + encodeURIComponent(c.address) + '">📍 Map</a>' : '') +
+      '</div></section>' +
+      '<section class="card"><div class="stats">' + stat('Paid you', money0(c.collected)) + stat('Quoted', money0(c.quoted)) +
+      stat('Jobs won', c.won + ' of ' + c.jobs.length) + '</div></section>' +
+      '<button class="btn btn-primary btn-xl" data-action="quote-for" data-key="' + esc(c.key) + '">＋ New quote for ' + esc((c.name || 'customer').split(' ')[0]) + '</button>' +
+      '<h2 class="section-title">Job history</h2>' +
+      c.jobs.map(function (j) {
+        return '<a class="job-card" href="#/job/' + j.id + '"><div class="job-main"><strong>' + esc(j.number) + (P.propertyLabel(j) ? ' · ' + esc(P.propertyLabel(j)) : '') + '</strong>' +
+          '<div class="muted small">' + fmtDate(j.updatedAt) + '</div><div class="job-tags">' + statusPill(j) + '</div></div>' +
+          '<div class="job-right"><div class="job-total">' + money0(P.calcJob(j, settings).total) + '</div></div></a>';
+      }).join('');
+  }
+
   function stat(label, value) {
     return '<div class="stat"><div class="muted small">' + label + '</div><div class="stat-v">' + value + '</div></div>';
   }
@@ -887,7 +1055,8 @@
       setField('stainPrice', 'Deck & fence stain', { type: 'number', pre: '$', unit: '/gal' }) + '</div>' +
       '<div class="row2">' + setField('floorPaintPrice', 'Floor paint', { type: 'number', pre: '$', unit: '/gal' }) +
       setField('epoxySqft', 'Epoxy kit', { type: 'number', pre: '$', unit: '/sq ft' }) + '</div>' +
-      '<div class="row2">' + setField('flakeSqft', 'Epoxy + flake kit', { type: 'number', pre: '$', unit: '/sq ft' }) + '</div></section>' +
+      '<div class="row2">' + setField('flakeSqft', 'Epoxy + flake kit', { type: 'number', pre: '$', unit: '/sq ft' }) +
+      setField('cabinetPaintPrice', 'Cabinet enamel', { type: 'number', pre: '$', unit: '/gal' }) + '</div></section>' +
 
       '<details class="card"><summary class="card-title">How fast you work <em class="muted small">(advanced)</em></summary>' +
       '<p class="muted small">Per coat, for one painter. The defaults suit most painters — adjust once you\'ve timed a few jobs.</p>' +
@@ -900,10 +1069,14 @@
       '<div class="row2">' + setField('extWallRate', 'Exterior siding', { type: 'number', unit: 'sq ft/hr' }) +
       setField('deckRate', 'Decks', { type: 'number', unit: 'sq ft/hr' }) + '</div>' +
       '<div class="row2">' + setField('fenceRate', 'Fences', { type: 'number', unit: 'sq ft/hr' }) +
-      setField('floorRate', 'Floor paint', { type: 'number', unit: 'sq ft/hr' }) + '</div></details>' +
+      setField('floorRate', 'Floor paint', { type: 'number', unit: 'sq ft/hr' }) + '</div>' +
+      '<div class="row2">' + setField('cabinetDoorHours', 'Each cabinet door', { type: 'number', unit: 'hrs' }) + '</div></details>' +
 
       '<section class="card"><h2 class="card-title">Quote fine print</h2>' +
       setField('terms', 'Terms shown on every quote', { textarea: true }) + '</section>' +
+      '<section class="card"><h2 class="card-title">Invoices</h2>' +
+      setField('invoiceDueDays', 'Payment due', { type: 'number', unit: 'days', hint: '0 = due on receipt' }) +
+      setField('paymentInstructions', 'How customers can pay you', { textarea: true }) + '</section>' +
       '<section class="card"><h2 class="card-title">🔒 Your data</h2>' +
       '<p class="muted small" style="margin-top:0">Your jobs, customers and money stay private on this device. Nothing is sent anywhere. ' +
       'Make a backup now and then (and before switching phones) so your history is never lost.' +
@@ -972,6 +1145,24 @@
       document.getElementById('job-list').innerHTML = jobCards();
       return;
     }
+    if (el.hasAttribute('data-customer-search')) {
+      customerSearch = el.value;
+      renderCustomers();
+      var cs = app.querySelector('[data-customer-search]');
+      cs.focus(); cs.setSelectionRange(cs.value.length, cs.value.length);
+      return;
+    }
+    if (el.dataset.schedule) {
+      var sj = findJob(el.dataset.schedule);
+      if (sj && el.value) {
+        sj.startDate = el.value;
+        if (S.statusOf(sj) === 'won') S.setStatus(sj, 'scheduled');
+        touch(sj);
+        renderSchedule();
+        toast('Scheduled for ' + fmtShort(el.value));
+      }
+      return;
+    }
     if (el.dataset.setting) {
       var key = el.dataset.setting;
       settings[key] = el.type === 'number' ? (el.value === '' ? '' : Number(el.value)) : el.value;
@@ -985,6 +1176,20 @@
     var path = el.dataset.field;
     var val = el.type === 'number' ? (el.value === '' ? '' : Number(el.value)) : el.value;
     setPath(job, path, val);
+    // Picking a past customer's name fills in their details
+    if (path === 'customer.name' && val) {
+      var match = S.customersFrom(jobs.filter(function (x) { return x !== job; }), settings)
+        .find(function (c) { return c.name && c.name.toLowerCase() === String(val).toLowerCase(); });
+      if (match) {
+        ['phone', 'email', 'address'].forEach(function (f) {
+          if (!job.customer[f] && match[f]) {
+            job.customer[f] = match[f];
+            var inp = app.querySelector('[data-field="customer.' + f + '"]');
+            if (inp) inp.value = match[f];
+          }
+        });
+      }
+    }
     var om = path.match(/^outside\.(\d+)\.(length|width)$/);
     if (om && job.outside[+om[1]].size && job.outside[+om[1]].size !== 'custom') {
       job.outside[+om[1]].size = 'custom';
@@ -999,6 +1204,12 @@
         var card = el.closest('.room-card');
         card.querySelectorAll('[data-action="size"]').forEach(function (b) { b.classList.toggle('on', b.dataset.v === 'custom'); });
       }
+    }
+    if (path === 'startDate' && val && S.statusOf(job) === 'won') {
+      S.setStatus(job, 'scheduled');
+      touch(job); renderJob(job);
+      toast('Scheduled 📅');
+      return;
     }
     touch(job);
     refreshTotals(job);
@@ -1072,6 +1283,12 @@
       case 'new-job':
         location.hash = '#/new';
         return;
+      case 'quote-for': {
+        var cust = S.customersFrom(jobs, settings).find(function (x) { return x.key === el.dataset.key; });
+        if (cust) pendingCustomer = { name: cust.name, phone: cust.phone, email: cust.email, address: cust.address };
+        location.hash = '#/new';
+        return;
+      }
       case 'create-job':
         location.hash = '#/job/' + newJob(el.dataset.type, el.dataset.prop).id;
         return;
@@ -1120,7 +1337,8 @@
         return;
       case 'o-seg': {
         var of = el.dataset.field, ov = el.dataset.v;
-        job.outside[i][of] = ['siding', 'system', 'condition', 'size'].indexOf(of) !== -1 ? ov : +ov;
+        job.outside[i][of] = ['siding', 'system', 'condition', 'size', 'method', 'retexture'].indexOf(of) !== -1 ? ov
+          : of === 'insides' ? ov === '1' : +ov;
         touch(job); renderJob(job);
         return;
       }
@@ -1221,12 +1439,15 @@
     }
 
     // Quote actions
-    var qjob = findJob(location.hash.split('/')[2]);
-    if (!qjob) return;
+    var hparts = location.hash.split('/');
+    var qjob = findJob(hparts[2]);
+    if (!qjob || (hparts[1] !== 'quote' && hparts[1] !== 'invoice')) return;
+    var kind = hparts[1] === 'invoice' ? 'invoice' : 'quote';
     var q = P.calcJob(qjob, settings);
-    var text = quoteText(qjob, q);
-    var subject = 'Painting estimate ' + qjob.number + (settings.businessName ? ' from ' + settings.businessName : '');
-    if (['email', 'share', 'print', 'copy'].indexOf(action) !== -1 && S.statusOf(qjob) === 'draft') {
+    var text = quoteText(qjob, q, kind);
+    var subject = (kind === 'invoice' ? 'Invoice ' + invoiceNumber(qjob) : 'Painting estimate ' + qjob.number) +
+      (settings.businessName ? ' from ' + settings.businessName : '');
+    if (kind === 'quote' && ['email', 'share', 'print', 'copy'].indexOf(action) !== -1 && S.statusOf(qjob) === 'draft') {
       S.setStatus(qjob, 'sent');
       saveJobs();
       setTimeout(function () { toast('Marked as Sent 📨'); }, 2400);
