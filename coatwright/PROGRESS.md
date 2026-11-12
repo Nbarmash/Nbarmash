@@ -3,7 +3,7 @@
 **Goal:** The go-to quoting app for up-and-coming painters. Enter the job details, get an
 itemized price, send it to the customer. Free to start, paid plan later.
 
-**Where we are now:** Live app at https://nbarmash.github.io/Nbarmash/coatwright/ (quoting, business tools, exterior & floors). Invoices/schedule/customers, cabinets & add-ons, the landing page and the video plan are built on the working branch. **Next: merge them so they go live; owner tests on a phone, grabs the domain/handles, and starts posting videos.**
+**Where we are now:** Everything is live. App: https://nbarmash.github.io/Nbarmash/coatwright/ · Landing page: https://nbarmash.github.io/Nbarmash/ (quoting, exterior/floors/cabinets, business tools, invoices, schedule, customers). **Next (owner): test on your phone, grab coatwright.com and @coatwright handles, show 5–10 painters, start posting the demo videos.**
 
 Legend: ✅ done · 🔄 in progress · ⬜ not started
 
@@ -143,3 +143,4 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - **2026-11-13** — Added cabinets and specialty add-ons (section renamed "Exterior, floors & specialty"); fixed stepper buttons overflowing on narrow phones. 29 tests passing.
 - **2026-11-13** — Built the landing page with real app screenshots (sample data). Fixed stepper labels being cut off.
 - **2026-11-13** — Wrote the launch video plan and recorded 2 demo videos from the real app. Fixed negative money showing as "$-140".
+- **2026-11-13** — Merged pull request #3 (invoices, schedule, customers, cabinets & add-ons, landing page, video plan). All live.
