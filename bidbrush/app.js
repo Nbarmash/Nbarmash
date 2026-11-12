@@ -1,4 +1,4 @@
-/* PaintQuote UI — plain JavaScript, no build step. */
+/* BidBrush UI — plain JavaScript, no build step. */
 (function () {
   'use strict';
 

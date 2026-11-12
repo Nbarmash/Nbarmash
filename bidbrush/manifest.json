@@ -1,6 +1,6 @@
 {
-  "name": "PaintQuote",
-  "short_name": "PaintQuote",
+  "name": "BidBrush",
+  "short_name": "BidBrush",
   "description": "Price a paint job in minutes and email the customer an itemized quote.",
   "start_url": "./",
   "scope": "./",

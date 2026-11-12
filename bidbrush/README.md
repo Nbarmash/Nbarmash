@@ -1,4 +1,4 @@
-# PaintQuote
+# BidBrush
 
 Price an interior paint job in minutes on your phone and send the customer a professional, itemized estimate.
 
@@ -28,7 +28,7 @@ All of this lives in `pricing.js`. Every rate is adjustable in Settings.
 ## Run it locally
 
 ```bash
-cd paint-quote
+cd bidbrush
 python3 -m http.server 8000   # then open http://localhost:8000
 node --test tests/pricing.test.js
 ```
@@ -37,8 +37,8 @@ node --test tests/pricing.test.js
 
 It's a static site with no build step. Any of these work:
 
-- **GitHub Pages**: repo Settings → Pages → deploy from branch → the app is at `/paint-quote/`
-- **Netlify / Vercel / Cloudflare Pages**: drag and drop the `paint-quote` folder
+- **GitHub Pages**: repo Settings → Pages → deploy from branch → the app is at `/bidbrush/`
+- **Netlify / Vercel / Cloudflare Pages**: drag and drop the `bidbrush` folder
 
 ## Ideas for next versions
 

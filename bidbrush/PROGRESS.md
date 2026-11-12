@@ -1,4 +1,4 @@
-# PaintQuote — Project Tracker
+# BidBrush — Project Tracker
 
 **Goal:** The go-to quoting app for up-and-coming painters. Enter the job details, get an
 itemized price, send it to the customer. Free to start, paid plan later.
@@ -28,7 +28,9 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ⬜ Turn on GitHub Pages so the app has a public link
 - ⬜ Install it on your own phone and quote a real (or pretend) job
 - ⬜ Check the default prices against real local numbers
-- 🔄 Pick a final name (shortlist: BidBrush, Cut & Quote, QuoteCoat, FirstCoat), check the domain, social handles and trademarks, then rename the app
+- ✅ Pick a final name: **BidBrush**
+- ✅ Rename the app to BidBrush (folder is now `bidbrush/`)
+- ⬜ Check bidbrush.com / bidbrush.app, social handles (TikTok, Instagram, Facebook) and the US trademark search, then grab them
 - ⬜ Give it free to 5–10 local painters
 - ⬜ Collect feedback: what's confusing, what's missing, what they'd pay
 
@@ -64,7 +66,8 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 |---|---|---|
 | 2026-11-12 | Web app instead of App Store app to start | Free, no app review, works on any phone |
 | 2026-11-12 | No AI inside the app for now | Pricing is math; keeps running costs at $0 |
-| 2026-11-12 | App lives in `paint-quote/` folder | Keeps the GitHub profile README separate |
+| 2026-11-12 | App lives in `bidbrush/` folder | Keeps the GitHub profile README separate |
+| 2026-11-12 | Name: **BidBrush** | Says what it does (bids) and who it's for (painters); short and works as a social handle |
 
 ## Log
 
@@ -73,3 +76,4 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
   Created this tracker.
 - **2026-11-12** — Name brainstorm: shortlist made, waiting for the owner to pick. Added the
   social-media video plan to Phase 5 (start when the app is ready to launch).
+- **2026-11-12** — Owner picked **BidBrush**. Renamed the app, files and folder (`bidbrush/`).
