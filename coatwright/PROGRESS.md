@@ -3,7 +3,7 @@
 **Goal:** The go-to quoting app for up-and-coming painters. Enter the job details, get an
 itemized price, send it to the customer. Free to start, paid plan later.
 
-**Where we are now:** Phase 1 is built, plus job types, full commercial list and quick estimate. Renamed to **Coatwright**. **Next: owner checks the domain/handles, merges the pull request, then we turn on GitHub Pages.**
+**Where we are now:** Phase 1 is built, plus job types, full commercial list and quick estimate. Renamed to **Coatwright** and merged into `main`. **Next: owner turns on GitHub Pages, then buys the domain and grabs the social handles.**
 
 Legend: ✅ done · 🔄 in progress · ⬜ not started
 
@@ -35,13 +35,13 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 
 ## Phase 2 — Get it online and in painters' hands ⬜
 
-- 🔄 Merge the code into `main` (pull request opened, owner to merge)
-- ⬜ Turn on GitHub Pages so the app has a public link
+- ✅ Merge the code into `main` (pull request #1)
+- 🔄 Turn on GitHub Pages so the app has a public link (owner: Settings → Pages → `main` → Save)
 - ⬜ Install it on your own phone and quote a real (or pretend) job
 - ⬜ Check the default prices against real local numbers
 - ✅ Pick a final name: **Coatwright** (first pick BidBrush was taken)
 - ✅ Rename the app to Coatwright (folder is now `coatwright/`)
-- ⬜ Check coatwright.com / coatwright.app, social handles (TikTok, Instagram, Facebook) and the US trademark search, then grab them
+- 🔄 Name check: web search found no company, website or app using Coatwright (only a *cancelled* "COATRIGHT" trademark). Owner still to buy the domain, grab @coatwright handles and confirm at tmsearch.uspto.gov
 - ⬜ Give it free to 5–10 local painters
 - ⬜ Collect feedback: what's confusing, what's missing, what they'd pay
 
@@ -104,3 +104,4 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
   Owner found bidbrush.pro; BrushBid also exists. Name to be changed before launch.
 - **2026-11-13** — Checked ~20 replacement names (Quoter, Spackle, Hueprint, Tintwork and others were taken).
   Owner picked **Coatwright**. Renamed the app and folder (`coatwright/`). Added a small "Made with Coatwright" line to quotes.
+- **2026-11-13** — Name check for Coatwright came up clear. Merged pull request #1 into `main`.
