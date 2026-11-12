@@ -61,18 +61,52 @@
     { name: 'Other', icon: '➕', size: 'M', doors: 1, windows: 1 }
   ];
 
-  var COMMERCIAL_ROOM_TYPES = [
-    { name: 'Office', icon: '💼', size: 'S', doors: 1, windows: 1, height: 9 },
-    { name: 'Conference Room', icon: '👥', size: 'M', doors: 1, windows: 2, height: 9 },
-    { name: 'Open Floor', icon: '🗂️', size: 'custom', length: 40, width: 30, height: 9, doors: 2, windows: 6 },
-    { name: 'Lobby', icon: '🛎️', size: 'L', doors: 2, windows: 2, height: 10 },
-    { name: 'Restroom', icon: '🚻', size: 'S', doors: 1, windows: 0, height: 9 },
-    { name: 'Break Room', icon: '☕', size: 'M', doors: 1, windows: 1, height: 9 },
-    { name: 'Hallway', icon: '🚪', size: 'custom', length: 30, width: 6, doors: 0, windows: 0, height: 9 },
-    { name: 'Other', icon: '➕', size: 'M', doors: 1, windows: 1, height: 9 }
+  // Every commercial area a painter might price, small closets to warehouse floors.
+  var C = function (id, name, icon, length, width, height, doors, windows) {
+    return { id: id, name: name, icon: icon, size: 'custom', length: length, width: width,
+      height: height, doors: doors, windows: windows };
+  };
+  var COMMERCIAL_AREAS = [
+    C('office', 'Office', '💼', 10, 12, 9, 1, 1),
+    C('conference', 'Conference Room', '👥', 14, 20, 9, 1, 2),
+    C('openoffice', 'Open Office', '🗂️', 40, 30, 9, 2, 6),
+    C('lobby', 'Lobby / Reception', '🛎️', 20, 16, 10, 2, 2),
+    C('waiting', 'Waiting Room', '🪑', 16, 14, 9, 1, 2),
+    C('restroom', 'Restroom', '🚻', 10, 8, 9, 1, 0),
+    C('breakroom', 'Break Room', '☕', 14, 12, 9, 1, 1),
+    C('hallway', 'Hallway / Corridor', '🚪', 30, 6, 9, 0, 0),
+    C('stairwell', 'Stairwell', '🪜', 10, 8, 20, 2, 0),
+    C('storage', 'Storage / Closet', '📦', 8, 6, 9, 1, 0),
+    C('salesfloor', 'Sales Floor', '🛍️', 40, 30, 12, 1, 2),
+    C('fitting', 'Fitting Room', '👗', 5, 5, 8, 1, 0),
+    C('dining', 'Dining Area', '🍽️', 30, 25, 10, 2, 4),
+    C('bar', 'Bar Area', '🍸', 20, 15, 10, 1, 1),
+    C('kitchen', 'Commercial Kitchen', '🍳', 20, 15, 10, 2, 0),
+    C('exam', 'Exam / Patient Room', '🩺', 10, 10, 9, 1, 1),
+    C('treatment', 'Treatment Room', '💆', 10, 10, 9, 1, 0),
+    C('salon', 'Salon Floor', '💇', 25, 20, 10, 1, 2),
+    C('guestroom', 'Hotel Guest Room', '🛏️', 12, 16, 9, 2, 1),
+    C('common', 'Common Area', '🛋️', 20, 15, 9, 2, 1),
+    C('laundry', 'Laundry Room', '🧺', 15, 12, 9, 1, 0),
+    C('classroom', 'Classroom', '🏫', 30, 25, 10, 1, 4),
+    C('teller', 'Teller Area', '🏦', 25, 20, 10, 1, 2),
+    C('hall', 'Event / Meeting Hall', '🎤', 60, 40, 16, 3, 6),
+    C('sanctuary', 'Sanctuary', '⛪', 60, 40, 20, 3, 8),
+    C('gymfloor', 'Workout / Gym Floor', '🏋️', 50, 40, 14, 2, 2),
+    C('locker', 'Locker Room', '🚿', 20, 15, 9, 1, 0),
+    C('showroom', 'Showroom', '🚗', 50, 40, 16, 2, 6),
+    C('servicebay', 'Service Bay / Shop', '🔧', 40, 30, 16, 2, 0),
+    C('warehouse', 'Warehouse Floor', '🏭', 100, 60, 20, 2, 0),
+    C('other', 'Other Area', '➕', 12, 14, 9, 1, 1)
   ];
+  var COMMERCIAL_ROOM_TYPES = COMMERCIAL_AREAS;
 
   // Step 1: Residential or Commercial. Step 2: the kind of property.
+  // For commercial, `areas` lists the most common areas first and `roomSqft`
+  // is the typical area size used by the square-footage quick estimate.
+  var P_ = function (id, label, icon, desc, areas, roomSqft, height) {
+    return { id: id, label: label, icon: icon, desc: desc, areas: areas, roomSqft: roomSqft, height: height };
+  };
   var JOB_TYPES = {
     residential: {
       label: 'Residential', icon: '🏡', desc: 'Houses, townhouses & condos',
@@ -83,19 +117,46 @@
       ]
     },
     commercial: {
-      label: 'Commercial', icon: '🏬', desc: 'Offices, stores & businesses',
+      label: 'Commercial', icon: '🏬', desc: 'Any business, big or small',
       properties: [
-        { id: 'office', label: 'Office', icon: '💼', desc: 'Office space or suite' },
-        { id: 'retail', label: 'Retail', icon: '🛍️', desc: 'Store or showroom' },
-        { id: 'restaurant', label: 'Restaurant', icon: '🍴', desc: 'Restaurant, café or bar' },
-        { id: 'warehouse', label: 'Warehouse', icon: '🏭', desc: 'Warehouse or industrial' },
-        { id: 'other', label: 'Other', icon: '🏛️', desc: 'Church, school, gym…' }
+        P_('office', 'Office', '💼', 'Suites to full floors', ['office', 'conference', 'openoffice', 'lobby', 'breakroom', 'restroom', 'hallway', 'storage', 'stairwell'], 250, 9),
+        P_('retail', 'Retail Store', '🛍️', 'Shops & boutiques', ['salesfloor', 'fitting', 'storage', 'office', 'restroom', 'breakroom'], 800, 12),
+        P_('restaurant', 'Restaurant / Bar', '🍴', 'Restaurants, cafés, bars', ['dining', 'bar', 'kitchen', 'restroom', 'office', 'storage', 'hallway'], 400, 10),
+        P_('medical', 'Medical / Dental', '🩺', 'Clinics & practices', ['waiting', 'exam', 'office', 'lobby', 'restroom', 'hallway', 'breakroom', 'storage'], 200, 9),
+        P_('hotel', 'Hotel / Motel', '🏨', 'Rooms, halls & lobbies', ['guestroom', 'hallway', 'lobby', 'stairwell', 'restroom', 'laundry', 'conference', 'dining'], 250, 9),
+        P_('apartments', 'Apartments / HOA', '🏢', 'Common areas & units', ['hallway', 'stairwell', 'lobby', 'common', 'laundry', 'gymfloor', 'office'], 400, 9),
+        P_('warehouse', 'Warehouse / Industrial', '🏭', 'Warehouses & plants', ['warehouse', 'office', 'breakroom', 'restroom', 'storage', 'stairwell'], 3000, 20),
+        P_('school', 'School / Daycare', '🏫', 'Classrooms & halls', ['classroom', 'hallway', 'office', 'restroom', 'hall', 'breakroom', 'kitchen'], 600, 10),
+        P_('church', 'Church', '⛪', 'Sanctuaries & halls', ['sanctuary', 'hall', 'classroom', 'office', 'restroom', 'lobby', 'kitchen', 'hallway'], 800, 12),
+        P_('gym', 'Gym / Fitness', '🏋️', 'Gyms & studios', ['gymfloor', 'locker', 'lobby', 'office', 'restroom', 'storage'], 1200, 14),
+        P_('salon', 'Salon / Spa', '💇', 'Salons, spas, barbers', ['salon', 'treatment', 'waiting', 'restroom', 'storage', 'breakroom'], 300, 10),
+        P_('bank', 'Bank', '🏦', 'Branches & offices', ['teller', 'lobby', 'office', 'conference', 'restroom', 'breakroom', 'storage'], 300, 10),
+        P_('auto', 'Auto Shop / Dealer', '🚗', 'Showrooms & service bays', ['showroom', 'servicebay', 'office', 'waiting', 'restroom', 'storage'], 1200, 16),
+        P_('government', 'Government', '🏛️', 'Public buildings', ['lobby', 'office', 'conference', 'hall', 'hallway', 'restroom', 'stairwell'], 400, 10),
+        P_('other', 'Other', '➕', 'Anything else', ['office', 'lobby', 'openoffice', 'hallway', 'restroom', 'storage'], 300, 9)
       ]
     }
   };
 
-  function roomTypesFor(jobType) {
-    return jobType === 'commercial' ? COMMERCIAL_ROOM_TYPES : ROOM_TYPES;
+  function findProperty(jobType, propertyType) {
+    var t = JOB_TYPES[jobType];
+    return t ? t.properties.find(function (x) { return x.id === propertyType; }) : null;
+  }
+
+  /**
+   * Room/area buttons for a job. Commercial: the property's common areas first,
+   * then every other area marked `more: true` (shown behind "More area types").
+   */
+  function roomTypesFor(jobType, propertyType) {
+    if (jobType !== 'commercial') return ROOM_TYPES;
+    var prop = findProperty(jobType, propertyType);
+    var primary = (prop && prop.areas ? prop.areas : ['office', 'lobby', 'openoffice', 'hallway', 'restroom', 'storage']).concat('other');
+    var byId = {};
+    COMMERCIAL_AREAS.forEach(function (a) { byId[a.id] = a; });
+    var first = primary.map(function (id) { return byId[id]; }).filter(Boolean);
+    var rest = COMMERCIAL_AREAS.filter(function (a) { return primary.indexOf(a.id) === -1; })
+      .map(function (a) { return Object.assign({}, a, { more: true }); });
+    return first.concat(rest);
   }
 
   /** "Residential · House" style label for a job (empty for older quotes without a type). */
@@ -126,7 +187,10 @@
     return Math.round((n + Number.EPSILON) * 100) / 100;
   }
 
+  // Taller walls take longer (ladders, then scaffolding or a lift).
   function heightFactor(h) {
+    if (h >= 20) return 1.8;
+    if (h >= 16) return 1.6;
     if (h >= 12) return 1.3;
     if (h >= 10) return 1.15;
     return 1;
@@ -216,8 +280,8 @@
     };
   }
 
-  function newQuick() {
-    return { sqft: '', height: 8, coats: 2, condition: 'good',
+  function newQuick(height) {
+    return { sqft: '', height: height || 8, coats: 2, condition: 'good',
       surfaces: { walls: true, ceiling: false, trim: true, doors: false } };
   }
 
@@ -231,10 +295,12 @@
    * Ballpark for a whole home/space from its total floor area: treat it as
    * N typical rooms, price one with calcRoom and scale up.
    */
-  function calcQuick(quick, settings, jobType) {
+  function calcQuick(quick, settings, jobType, propertyType) {
     var q = quick || newQuick();
     var area = num(q.sqft);
     var profile = QUICK_PROFILE[jobType] || QUICK_PROFILE.residential;
+    var prop = findProperty(jobType, propertyType);
+    if (prop && prop.roomSqft) profile = Object.assign({}, profile, { roomSqft: prop.roomSqft });
     var n = Math.max(1, area / profile.roomSqft);
     var side = area > 0 ? Math.sqrt(area / n) : 0;
     var one = calcRoom({
@@ -281,7 +347,7 @@
       ? [{ id: 'quick', name: job.jobType === 'commercial' ? 'Whole space' : 'Whole home', quick: true }]
       : (job.rooms || []);
     var rooms = source.map(function (room) {
-      var c = room.quick ? calcQuick(job.quick, s, job.jobType) : calcRoom(room, s);
+      var c = room.quick ? calcQuick(job.quick, s, job.jobType, job.propertyType) : calcRoom(room, s);
       c.summary = room.quick
         ? Math.round(c.floorArea).toLocaleString('en-US') + ' sq ft, ' + c.height + ' ft ceilings'
         : c.length + '×' + c.width + ' ft, ' + c.height + ' ft ceilings';
@@ -373,6 +439,8 @@
     SIZES: SIZES,
     ROOM_TYPES: ROOM_TYPES,
     COMMERCIAL_ROOM_TYPES: COMMERCIAL_ROOM_TYPES,
+    COMMERCIAL_AREAS: COMMERCIAL_AREAS,
+    findProperty: findProperty,
     JOB_TYPES: JOB_TYPES,
     roomTypesFor: roomTypesFor,
     propertyLabel: propertyLabel,

@@ -71,6 +71,7 @@
       updatedAt: Date.now(),
       customer: { name: '', phone: '', email: '', address: '' },
       rooms: [],
+      quick: P.newQuick((P.findProperty(jobType, propertyType) || {}).height),
       extras: [],
       discount: 0,
       notes: ''
@@ -137,7 +138,7 @@
       '<div class="page-head"><a href="#/new" class="back">‹ Back</a><span class="muted small">Step 2 of 2</span></div>' +
       '<div class="tag">' + t.icon + ' ' + t.label + '</div>' +
       '<h1 class="ask">What type of property?</h1>' +
-      '<div class="pick-list">' + t.properties.map(function (p) {
+      '<div class="pick-list' + (t.properties.length > 6 ? ' grid' : '') + '">' + t.properties.map(function (p) {
         return '<button type="button" class="pick" data-action="create-job" data-type="' + type + '" data-prop="' + p.id + '">' +
           '<span class="pick-icon">' + p.icon + '</span><span><strong>' + p.label + '</strong><span class="muted small">' + p.desc + '</span></span>' +
           '<span class="chev">›</span></button>';
@@ -238,7 +239,9 @@
       '<label class="field sqft"><span>Total square footage ' + (commercial ? 'of the space' : 'of the home') + '</span>' +
       '<div class="with-unit"><input type="number" inputmode="numeric" min="0" step="1" data-field="quick.sqft" value="' + esc(q.sqft) +
       '" placeholder="e.g. 2000"><em>sq ft</em></div><small class="muted">Check Zillow, the listing or ask the customer.</small></label>' +
-      '<div class="label">Ceiling height</div>' + qseg('height', q.height, [[8, '8 ft'], [9, '9 ft'], [10, '10 ft'], [12, '12+ ft']]) +
+      '<div class="label">Ceiling height' + (commercial ? ' (ft)' : '') + '</div>' + qseg('height', q.height, commercial
+        ? [[9, '9'], [10, '10'], [12, '12'], [16, '16'], [20, '20+']]
+        : [[8, '8 ft'], [9, '9 ft'], [10, '10 ft'], [12, '12+ ft']]) +
       '<div class="label">What are we painting?</div><div class="chips">' + opts.map(function (o) {
         var on = q.surfaces[o[0]];
         return '<button type="button" class="chip toggle' + (on ? ' on' : '') + '" aria-pressed="' + !!on + '" data-action="q-surface" data-v="' + o[0] + '">' +
@@ -257,7 +260,11 @@
     var calc = P.calcJob(job, settings);
     var cu = job.customer;
     var commercial = job.jobType === 'commercial';
-    var roomTypes = P.roomTypesFor(job.jobType);
+    var roomTypes = P.roomTypesFor(job.jobType, job.propertyType);
+    var typeBtn = function (t, k) {
+      return '<button type="button" data-action="add-room" data-k="' + k + '"><span>' + t.icon + '</span>' + esc(t.name) + '</button>';
+    };
+    var moreTypes = roomTypes.map(typeBtn).filter(function (_, k) { return roomTypes[k].more; });
     app.innerHTML =
       '<div class="page-head"><a href="#/" class="back">‹ Quotes</a><span class="muted">' + esc(job.number) + '</span></div>' +
 
@@ -277,9 +284,10 @@
       (quick ? quickCard(job, calc) :
         job.rooms.map(function (r, i) { return roomCard(r, i, calc); }).join('') +
         '<section class="card add-room"><div class="label">' + (job.rooms.length ? 'Add another room' : 'Tap a room to add it') + '</div>' +
-        '<div class="room-types">' + roomTypes.map(function (t, k) {
-          return '<button type="button" data-action="add-room" data-k="' + k + '"><span>' + t.icon + '</span>' + t.name + '</button>';
-        }).join('') + '</div></section>') +
+        '<div class="room-types">' + roomTypes.map(typeBtn).filter(function (_, k) { return !roomTypes[k].more; }).join('') + '</div>' +
+        (moreTypes.length ? '<details class="more-types"><summary>More area types (' + moreTypes.length + ')</summary>' +
+          '<div class="room-types">' + moreTypes.join('') + '</div></details>' : '') +
+        '</section>') +
 
       '<details class="card"' + (job.extras.length || job.discount || job.notes ? ' open' : '') + '><summary class="card-title"><span class="step">3</span> Extras, discount & notes <em class="muted small">(optional)</em></summary>' +
       job.extras.map(function (e, i) {
@@ -594,7 +602,7 @@
         return;
       }
       case 'add-room': {
-        var room = P.newRoom(P.roomTypesFor(job.jobType)[+el.dataset.k]);
+        var room = P.newRoom(P.roomTypesFor(job.jobType, job.propertyType)[+el.dataset.k]);
         var same = job.rooms.filter(function (r) { return r.name.indexOf(room.name) === 0; }).length;
         if (same) room.name += ' ' + (same + 1);
         job.rooms.push(room);

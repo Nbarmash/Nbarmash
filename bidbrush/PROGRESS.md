@@ -3,7 +3,7 @@
 **Goal:** The go-to quoting app for up-and-coming painters. Enter the job details, get an
 itemized price, send it to the customer. Free to start, paid plan later.
 
-**Where we are now:** Phase 1 is built, plus job types and the square-footage quick estimate. **Next: owner merges the pull request, then we turn on GitHub Pages.**
+**Where we are now:** Phase 1 is built, plus job types, full commercial list and quick estimate. **Name needs to change (BidBrush is taken).** **Next: owner merges the pull request, then we turn on GitHub Pages.**
 
 Legend: ✅ done · 🔄 in progress · ⬜ not started
 
@@ -26,11 +26,12 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 
 - ✅ Choose Residential or Commercial when starting a quote
 - ✅ Residential → House, Townhouse or Condo, then continue to the quote
-- ✅ Commercial → Office, Retail, Restaurant, Warehouse or Other (owner to confirm this list)
-- ✅ Commercial room presets (Office, Conference Room, Open Floor, Lobby, Restroom, Break Room, Hallway)
+- ✅ Commercial → 15 property types, big or small (office, retail, restaurant, medical, hotel, apartments/HOA, warehouse, school, church, gym, salon, bank, auto, government, other)
+- ✅ 31 commercial area types (closets to warehouse floors); each property shows its common areas first, the rest under "More area types"
+- ✅ Taller walls priced for scaffolding/lifts (16 ft+ and 20 ft+)
 - ✅ Property type shown on the quote, email text and quote list; can be changed while editing
 - ✅ Quick estimate from the total square footage (⚡ Quick / 📐 Room by room switch; quote says it's a ballpark)
-- ⬜ Decide if property type should change pricing (e.g. condo building rules, commercial rates or after-hours work)
+- ✅ Property type does not change pricing rules for now (owner: "everything else is good")
 
 ## Phase 2 — Get it online and in painters' hands ⬜
 
@@ -38,7 +39,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ⬜ Turn on GitHub Pages so the app has a public link
 - ⬜ Install it on your own phone and quote a real (or pretend) job
 - ⬜ Check the default prices against real local numbers
-- ✅ Pick a final name: **BidBrush**
+- 🔄 Pick a final name: **BidBrush** is likely taken (bidbrush.pro exists; "BrushBid" is a painter estimating app). Choosing a new one
 - ✅ Rename the app to BidBrush (folder is now `bidbrush/`)
 - ⬜ Check bidbrush.com / bidbrush.app, social handles (TikTok, Instagram, Facebook) and the US trademark search, then grab them
 - ⬜ Give it free to 5–10 local painters
@@ -81,7 +82,9 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 | 2026-11-13 | Quotes start by picking Residential (House / Townhouse / Condo) or Commercial | Owner request; tailors room presets and shows the property on the quote |
 | 2026-11-13 | Room scanning postponed to the native-app stage | Works well only on Pro iPhones in a native app (App Store fees, much more work); AI photo guesses are too rough for pricing |
 | 2026-11-13 | Quick estimate treats the home as typical rooms (150 sq ft homes, 300 sq ft commercial) | Reuses the same pricing rules; lands around $3–6 per floor sq ft for walls + trim, in line with typical repaints |
-| 2026-11-12 | Name: **BidBrush** | Says what it does (bids) and who it's for (painters); short and works as a social handle |
+| 2026-11-13 | Commercial covers every business type with its own common areas | Owner: "include everything, big or small" |
+| 2026-11-13 | Drop the BidBrush name | Owner found bidbrush.pro; a painter estimating app called BrushBid also exists, so trademark and search confusion risk |
+| 2026-11-12 | Name: **BidBrush** (replaced) | Says what it does (bids) and who it's for (painters); short and works as a social handle |
 
 ## Log
 
@@ -96,3 +99,5 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - **2026-11-13** — Opened the pull request to merge into `main`. Looked into room scanning:
   postponed to Phase 4; added a whole-home square-footage quick estimate as a cheaper idea.
 - **2026-11-13** — Built the square-footage quick estimate. 11 tests passing; tested on a simulated iPhone.
+- **2026-11-13** — Expanded Commercial (15 property types, 31 area types, tall-wall pricing). 14 tests passing.
+  Owner found bidbrush.pro; BrushBid also exists. Name to be changed before launch.

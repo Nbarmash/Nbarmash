@@ -80,9 +80,9 @@ test('residential offers house, townhouse and condo', () => {
 test('room presets and labels follow the job type', () => {
   assert.strictEqual(P.roomTypesFor('residential'), P.ROOM_TYPES);
   assert.strictEqual(P.roomTypesFor(undefined), P.ROOM_TYPES);
-  assert.strictEqual(P.roomTypesFor('commercial'), P.COMMERCIAL_ROOM_TYPES);
-  const office = P.newRoom(P.COMMERCIAL_ROOM_TYPES[0]);
-  assert.strictEqual(office.height, 9);
+  const office = P.roomTypesFor('commercial', 'office');
+  assert.strictEqual(office[0].name, 'Office');
+  assert.strictEqual(P.newRoom(office[0]).height, 9);
   assert.strictEqual(P.propertyLabel({ jobType: 'residential', propertyType: 'condo' }), 'Residential · Condo');
   assert.strictEqual(P.propertyLabel({}), '');
 });
@@ -109,6 +109,34 @@ test('quick mode prices the whole home and ignores room-by-room entries', () => 
   // Empty square footage = $0, no NaN
   const empty = P.calcJob({ mode: 'quick', quick: P.newQuick() }, settings);
   assert.strictEqual(empty.total, 0);
+});
+
+test('commercial covers every kind of business, each with its common areas first', () => {
+  const props = P.JOB_TYPES.commercial.properties;
+  assert.ok(props.length >= 12);
+  const allIds = P.COMMERCIAL_AREAS.map(a => a.id);
+  props.forEach(p => {
+    const list = P.roomTypesFor('commercial', p.id);
+    // every area is offered exactly once, the property's own areas first
+    assert.strictEqual(list.length, P.COMMERCIAL_AREAS.length, p.id);
+    assert.deepStrictEqual(list.map(a => a.id).sort(), allIds.slice().sort(), p.id);
+    p.areas.forEach((id, i) => assert.strictEqual(list[i].id, id, p.id + ' order'));
+    assert.ok(!list[0].more && list[list.length - 1].more !== undefined);
+  });
+});
+
+test('very tall walls (warehouses, sanctuaries) cost more per sq ft', () => {
+  const base = { length: 40, width: 40, doors: 0, windows: 0, coats: 2, surfaces: { walls: true } };
+  const r12 = P.calcRoom(Object.assign({}, base, { height: 12 }), settings);
+  const r20 = P.calcRoom(Object.assign({}, base, { height: 20 }), settings);
+  assert.ok(r20.hours / r20.wallArea > r12.hours / r12.wallArea * 1.3);
+});
+
+test('quick estimate uses bigger areas for open buildings like warehouses', () => {
+  const q = Object.assign(P.newQuick(20), { sqft: 20000 });
+  const wh = P.calcQuick(q, settings, 'commercial', 'warehouse');
+  const off = P.calcQuick(q, settings, 'commercial', 'office');
+  assert.ok(wh.wallArea < off.wallArea, 'open warehouse has far fewer walls than offices');
 });
 
 test('new rooms from presets have sensible defaults', () => {
