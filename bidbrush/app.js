@@ -61,10 +61,12 @@
     target[last] = value;
   }
 
-  function newJob() {
+  function newJob(jobType, propertyType) {
     var job = {
       id: uid(),
       number: 'Q-' + settings.nextNumber,
+      jobType: jobType,
+      propertyType: propertyType,
       createdAt: Date.now(),
       updatedAt: Date.now(),
       customer: { name: '', phone: '', email: '', address: '' },
@@ -90,6 +92,7 @@
     if ((view === 'job' || view === 'quote') && !job) { location.hash = '#/'; return; }
     if (view === 'job') renderJob(job);
     else if (view === 'quote') renderQuote(job);
+    else if (view === 'new') renderNewJob(P.JOB_TYPES[id] ? id : null);
     else if (view === 'settings') renderSettings();
     else renderHome();
   }
@@ -102,7 +105,8 @@
       var q = P.calcJob(j, settings);
       return '<a class="job-card" href="#/job/' + j.id + '">' +
         '<div><strong>' + esc(j.customer.name || 'New customer') + '</strong>' +
-        '<div class="muted small">' + esc(j.customer.address || j.number) + ' · ' + fmtDate(j.updatedAt) + '</div></div>' +
+        '<div class="muted small">' + esc(j.customer.address || j.number) + ' · ' + fmtDate(j.updatedAt) + '</div>' +
+        (P.propertyLabel(j) ? '<div class="tag">' + esc(P.propertyLabel(j)) + '</div>' : '') + '</div>' +
         '<div class="job-total">' + money0(q.total) + '</div></a>';
     }).join('');
 
@@ -113,6 +117,44 @@
       '<h2 class="section-title">Your quotes</h2>' +
       (list || '<div class="empty"><div class="empty-icon">🎨</div><p>No quotes yet.</p>' +
         '<p class="muted small">Tap <b>New Quote</b>, add rooms and send the customer a professional, itemized price in minutes.</p></div>');
+  }
+
+  // ---------- New quote: pick job type, then property ----------
+  function renderNewJob(type) {
+    if (!type) {
+      app.innerHTML =
+        '<div class="page-head"><a href="#/" class="back">‹ Quotes</a><span class="muted small">Step 1 of 2</span></div>' +
+        '<h1 class="ask">What kind of job is it?</h1>' +
+        '<div class="pick-list">' + Object.keys(P.JOB_TYPES).map(function (k) {
+          var t = P.JOB_TYPES[k];
+          return '<a class="pick big" href="#/new/' + k + '"><span class="pick-icon">' + t.icon + '</span>' +
+            '<span><strong>' + t.label + '</strong><span class="muted small">' + t.desc + '</span></span><span class="chev">›</span></a>';
+        }).join('') + '</div>';
+      return;
+    }
+    var t = P.JOB_TYPES[type];
+    app.innerHTML =
+      '<div class="page-head"><a href="#/new" class="back">‹ Back</a><span class="muted small">Step 2 of 2</span></div>' +
+      '<div class="tag">' + t.icon + ' ' + t.label + '</div>' +
+      '<h1 class="ask">What type of property?</h1>' +
+      '<div class="pick-list">' + t.properties.map(function (p) {
+        return '<button type="button" class="pick" data-action="create-job" data-type="' + type + '" data-prop="' + p.id + '">' +
+          '<span class="pick-icon">' + p.icon + '</span><span><strong>' + p.label + '</strong><span class="muted small">' + p.desc + '</span></span>' +
+          '<span class="chev">›</span></button>';
+      }).join('') + '</div>';
+  }
+
+  function propertyPicker(job) {
+    var type = P.JOB_TYPES[job.jobType] ? job.jobType : 'residential';
+    return '<div class="label">Job type</div>' +
+      '<div class="segmented">' + Object.keys(P.JOB_TYPES).map(function (k) {
+        return '<button type="button" class="' + (k === job.jobType ? 'on' : '') + '" data-action="jobtype" data-v="' + k + '">' +
+          P.JOB_TYPES[k].icon + ' ' + P.JOB_TYPES[k].label + '</button>';
+      }).join('') + '</div>' +
+      '<div class="chips prop-chips">' + P.JOB_TYPES[type].properties.map(function (p) {
+        return '<button type="button" class="chip' + (p.id === job.propertyType ? ' on' : '') + '" data-action="prop" data-v="' + p.id + '">' +
+          p.icon + ' ' + p.label + '</button>';
+      }).join('') + '</div>';
   }
 
   // ---------- Job editor ----------
@@ -182,20 +224,24 @@
   function renderJob(job) {
     var calc = P.calcJob(job, settings);
     var cu = job.customer;
+    var commercial = job.jobType === 'commercial';
+    var roomTypes = P.roomTypesFor(job.jobType);
     app.innerHTML =
       '<div class="page-head"><a href="#/" class="back">‹ Quotes</a><span class="muted">' + esc(job.number) + '</span></div>' +
 
       '<section class="card"><h2 class="card-title"><span class="step">1</span> Customer</h2>' +
-      '<label class="field"><span>Name</span><input data-field="customer.name" value="' + esc(cu.name) + '" placeholder="Jane Smith" autocomplete="off"></label>' +
+      '<label class="field"><span>' + (commercial ? 'Business / contact name' : 'Name') + '</span><input data-field="customer.name" value="' + esc(cu.name) +
+      '" placeholder="' + (commercial ? 'Acme Dental — Dr. Lee' : 'Jane Smith') + '" autocomplete="off"></label>' +
       '<label class="field"><span>Address</span><input data-field="customer.address" value="' + esc(cu.address) + '" placeholder="123 Main St" autocomplete="off"></label>' +
       '<div class="row2"><label class="field"><span>Phone</span><input type="tel" data-field="customer.phone" value="' + esc(cu.phone) + '" placeholder="(555) 555-5555"></label>' +
       '<label class="field"><span>Email</span><input type="email" data-field="customer.email" value="' + esc(cu.email) + '" placeholder="jane@email.com" autocapitalize="off"></label></div>' +
+      propertyPicker(job) +
       '</section>' +
 
       '<h2 class="section-title"><span class="step">2</span> Rooms</h2>' +
       job.rooms.map(function (r, i) { return roomCard(r, i, calc); }).join('') +
       '<section class="card add-room"><div class="label">' + (job.rooms.length ? 'Add another room' : 'Tap a room to add it') + '</div>' +
-      '<div class="room-types">' + P.ROOM_TYPES.map(function (t, k) {
+      '<div class="room-types">' + roomTypes.map(function (t, k) {
         return '<button type="button" data-action="add-room" data-k="' + k + '"><span>' + t.icon + '</span>' + t.name + '</button>';
       }).join('') + '</div></section>' +
 
@@ -276,8 +322,9 @@
       '<div><div class="doc-bizname">' + esc(s.businessName || 'Your Painting Co.') + '</div><div class="muted small">' + biz + '</div></div></div>' +
       '<div class="doc-meta"><div class="doc-title">ESTIMATE</div><div>' + esc(job.number) + '</div>' +
       '<div class="muted small">' + fmtDate(job.updatedAt) + '<br>Valid until ' + fmtDate(valid) + '</div></div></header>' +
-      '<div class="doc-to"><div class="label">Prepared for</div><strong>' + esc(cu.name || '—') + '</strong>' +
+      '<div class="doc-to"><div><div class="label">Prepared for</div><strong>' + esc(cu.name || '—') + '</strong>' +
       '<div class="muted small">' + [cu.address, cu.phone, cu.email].filter(Boolean).map(esc).join('<br>') + '</div></div>' +
+      (P.propertyLabel(job) ? '<div><div class="label">Property</div><strong>' + esc(P.propertyLabel(job)) + '</strong></div>' : '') + '</div>' +
       '<table class="lines"><tbody>' + (rows || '<tr><td class="muted">Add rooms to build the estimate.</td><td></td></tr>') + '</tbody>' +
       '<tfoot>' + totals + '</tfoot></table>' +
       (job.notes ? '<div class="doc-notes"><div class="label">Notes</div>' + esc(job.notes).replace(/\n/g, '<br>') + '</div>' : '') +
@@ -290,7 +337,9 @@
     var s = settings, cu = job.customer, out = [];
     var pad = function (label, amt) { return label + ': ' + amt; };
     out.push('Hi ' + (cu.name ? cu.name.split(' ')[0] : 'there') + ',', '');
-    out.push('Thank you for the opportunity! Here is your painting estimate (' + job.number + ').', '');
+    out.push('Thank you for the opportunity! Here is your painting estimate (' + job.number + ').');
+    if (P.propertyLabel(job)) out.push('Property: ' + P.propertyLabel(job) + (cu.address ? ' — ' + cu.address : ''));
+    out.push('');
     q.rooms.forEach(function (r) {
       if (!r.lines.length) return;
       out.push(r.name.toUpperCase() + ' — ' + money(r.price));
@@ -469,10 +518,24 @@
 
     switch (action) {
       case 'new-job':
-        location.hash = '#/job/' + newJob().id;
+        location.hash = '#/new';
+        return;
+      case 'create-job':
+        location.hash = '#/job/' + newJob(el.dataset.type, el.dataset.prop).id;
+        return;
+      case 'jobtype':
+        if (job.jobType === el.dataset.v) return;
+        job.jobType = el.dataset.v;
+        job.propertyType = P.JOB_TYPES[job.jobType].properties[0].id;
+        touch(job); renderJob(job);
+        return;
+      case 'prop':
+        if (!job.jobType) job.jobType = 'residential';
+        job.propertyType = el.dataset.v;
+        touch(job); renderJob(job);
         return;
       case 'add-room': {
-        var room = P.newRoom(P.ROOM_TYPES[+el.dataset.k]);
+        var room = P.newRoom(P.roomTypesFor(job.jobType)[+el.dataset.k]);
         var same = job.rooms.filter(function (r) { return r.name.indexOf(room.name) === 0; }).length;
         if (same) room.name += ' ' + (same + 1);
         job.rooms.push(room);

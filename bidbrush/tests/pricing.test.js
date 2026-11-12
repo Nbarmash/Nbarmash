@@ -71,6 +71,22 @@ test('empty job is $0 and never NaN', () => {
   assert.ok(Number.isFinite(q2.total));
 });
 
+test('residential offers house, townhouse and condo', () => {
+  const ids = P.JOB_TYPES.residential.properties.map(p => p.id);
+  assert.deepStrictEqual(ids, ['house', 'townhouse', 'condo']);
+  assert.ok(P.JOB_TYPES.commercial.properties.length > 0);
+});
+
+test('room presets and labels follow the job type', () => {
+  assert.strictEqual(P.roomTypesFor('residential'), P.ROOM_TYPES);
+  assert.strictEqual(P.roomTypesFor(undefined), P.ROOM_TYPES);
+  assert.strictEqual(P.roomTypesFor('commercial'), P.COMMERCIAL_ROOM_TYPES);
+  const office = P.newRoom(P.COMMERCIAL_ROOM_TYPES[0]);
+  assert.strictEqual(office.height, 9);
+  assert.strictEqual(P.propertyLabel({ jobType: 'residential', propertyType: 'condo' }), 'Residential · Condo');
+  assert.strictEqual(P.propertyLabel({}), '');
+});
+
 test('new rooms from presets have sensible defaults', () => {
   const r = P.newRoom(P.ROOM_TYPES[0]);
   assert.strictEqual(r.name, 'Bedroom');

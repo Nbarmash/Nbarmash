@@ -61,6 +61,51 @@
     { name: 'Other', icon: '➕', size: 'M', doors: 1, windows: 1 }
   ];
 
+  var COMMERCIAL_ROOM_TYPES = [
+    { name: 'Office', icon: '💼', size: 'S', doors: 1, windows: 1, height: 9 },
+    { name: 'Conference Room', icon: '👥', size: 'M', doors: 1, windows: 2, height: 9 },
+    { name: 'Open Floor', icon: '🗂️', size: 'custom', length: 40, width: 30, height: 9, doors: 2, windows: 6 },
+    { name: 'Lobby', icon: '🛎️', size: 'L', doors: 2, windows: 2, height: 10 },
+    { name: 'Restroom', icon: '🚻', size: 'S', doors: 1, windows: 0, height: 9 },
+    { name: 'Break Room', icon: '☕', size: 'M', doors: 1, windows: 1, height: 9 },
+    { name: 'Hallway', icon: '🚪', size: 'custom', length: 30, width: 6, doors: 0, windows: 0, height: 9 },
+    { name: 'Other', icon: '➕', size: 'M', doors: 1, windows: 1, height: 9 }
+  ];
+
+  // Step 1: Residential or Commercial. Step 2: the kind of property.
+  var JOB_TYPES = {
+    residential: {
+      label: 'Residential', icon: '🏡', desc: 'Houses, townhouses & condos',
+      properties: [
+        { id: 'house', label: 'House', icon: '🏠', desc: 'Single-family home' },
+        { id: 'townhouse', label: 'Townhouse', icon: '🏘️', desc: 'Shared walls, usually 2–3 floors' },
+        { id: 'condo', label: 'Condo', icon: '🏢', desc: 'Unit inside a building' }
+      ]
+    },
+    commercial: {
+      label: 'Commercial', icon: '🏬', desc: 'Offices, stores & businesses',
+      properties: [
+        { id: 'office', label: 'Office', icon: '💼', desc: 'Office space or suite' },
+        { id: 'retail', label: 'Retail', icon: '🛍️', desc: 'Store or showroom' },
+        { id: 'restaurant', label: 'Restaurant', icon: '🍴', desc: 'Restaurant, café or bar' },
+        { id: 'warehouse', label: 'Warehouse', icon: '🏭', desc: 'Warehouse or industrial' },
+        { id: 'other', label: 'Other', icon: '🏛️', desc: 'Church, school, gym…' }
+      ]
+    }
+  };
+
+  function roomTypesFor(jobType) {
+    return jobType === 'commercial' ? COMMERCIAL_ROOM_TYPES : ROOM_TYPES;
+  }
+
+  /** "Residential · House" style label for a job (empty for older quotes without a type). */
+  function propertyLabel(job) {
+    var t = JOB_TYPES[job && job.jobType];
+    if (!t) return '';
+    var p = t.properties.find(function (x) { return x.id === job.propertyType; });
+    return t.label + (p ? ' · ' + p.label : '');
+  }
+
   var CONDITIONS = {
     good: { label: 'Good', labor: 1 },
     fair: { label: 'Fair', labor: 1.15 },
@@ -96,7 +141,7 @@
       size: t.size,
       length: t.length || size.length || 12,
       width: t.width || size.width || 12,
-      height: 8,
+      height: t.height || 8,
       doors: t.doors,
       windows: t.windows,
       coats: 2,
@@ -265,6 +310,10 @@
     DEFAULT_SETTINGS: DEFAULT_SETTINGS,
     SIZES: SIZES,
     ROOM_TYPES: ROOM_TYPES,
+    COMMERCIAL_ROOM_TYPES: COMMERCIAL_ROOM_TYPES,
+    JOB_TYPES: JOB_TYPES,
+    roomTypesFor: roomTypesFor,
+    propertyLabel: propertyLabel,
     CONDITIONS: CONDITIONS,
     newRoom: newRoom,
     calcRoom: calcRoom,

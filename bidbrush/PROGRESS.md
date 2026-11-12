@@ -3,7 +3,7 @@
 **Goal:** The go-to quoting app for up-and-coming painters. Enter the job details, get an
 itemized price, send it to the customer. Free to start, paid plan later.
 
-**Where we are now:** Phase 1 is built and pushed. **Next: put it online (Phase 2, step 1).**
+**Where we are now:** Phase 1 is built, plus the Residential/Commercial job types. **Next: put it online (Phase 2, step 1).**
 
 Legend: ✅ done · 🔄 in progress · ⬜ not started
 
@@ -21,6 +21,15 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ✅ Settings: business info, logo, rates, paint prices, work speeds
 - ✅ Quotes saved on the phone, works offline, installable on home screen
 - ✅ Tested end to end on a simulated iPhone
+
+## Phase 1b — Owner feature requests 🔄
+
+- ✅ Choose Residential or Commercial when starting a quote
+- ✅ Residential → House, Townhouse or Condo, then continue to the quote
+- ✅ Commercial → Office, Retail, Restaurant, Warehouse or Other (owner to confirm this list)
+- ✅ Commercial room presets (Office, Conference Room, Open Floor, Lobby, Restroom, Break Room, Hallway)
+- ✅ Property type shown on the quote, email text and quote list; can be changed while editing
+- ⬜ Decide if property type should change pricing (e.g. condo building rules, commercial rates or after-hours work)
 
 ## Phase 2 — Get it online and in painters' hands ⬜
 
@@ -67,6 +76,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 | 2026-11-12 | Web app instead of App Store app to start | Free, no app review, works on any phone |
 | 2026-11-12 | No AI inside the app for now | Pricing is math; keeps running costs at $0 |
 | 2026-11-12 | App lives in `bidbrush/` folder | Keeps the GitHub profile README separate |
+| 2026-11-13 | Quotes start by picking Residential (House / Townhouse / Condo) or Commercial | Owner request; tailors room presets and shows the property on the quote |
 | 2026-11-12 | Name: **BidBrush** | Says what it does (bids) and who it's for (painters); short and works as a social handle |
 
 ## Log
@@ -77,3 +87,5 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - **2026-11-12** — Name brainstorm: shortlist made, waiting for the owner to pick. Added the
   social-media video plan to Phase 5 (start when the app is ready to launch).
 - **2026-11-12** — Owner picked **BidBrush**. Renamed the app, files and folder (`bidbrush/`).
+- **2026-11-13** — Added the Residential/Commercial job type step with property types,
+  commercial room presets, and the property on quotes. 9 tests passing; tested on a simulated iPhone.
