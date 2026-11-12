@@ -14,11 +14,15 @@
 <body>
   <header class="topbar no-print">
     <a href="#/" class="brand"><img src="icon.svg" alt="" width="28" height="28"> Coatwright</a>
-    <a href="#/settings" class="icon-btn" aria-label="Settings">⚙️</a>
+    <nav class="top-actions">
+      <a href="#/stats" class="icon-btn" aria-label="Business stats">📊</a>
+      <a href="#/settings" class="icon-btn" aria-label="Settings">⚙️</a>
+    </nav>
   </header>
   <main id="app"></main>
   <div id="toast" role="status" aria-live="polite"></div>
   <script src="pricing.js"></script>
+  <script src="stats.js"></script>
   <script src="app.js"></script>
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {

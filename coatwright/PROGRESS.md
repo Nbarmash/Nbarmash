@@ -3,7 +3,7 @@
 **Goal:** The go-to quoting app for up-and-coming painters. Enter the job details, get an
 itemized price, send it to the customer. Free to start, paid plan later.
 
-**Where we are now:** Phase 1 is built, plus job types, full commercial list and quick estimate. **Coatwright is live** at https://nbarmash.github.io/Nbarmash/coatwright/ . **Next: install it on your phone and quote a test job.**
+**Where we are now:** Phase 1 is built, plus job types, full commercial list and quick estimate. **Coatwright is live** at https://nbarmash.github.io/Nbarmash/coatwright/ . Business tools (job tracking, payments, real profit, stats) are built on the branch. **Next: merge them so they go live, then test on your phone.**
 
 Legend: ✅ done · 🔄 in progress · ⬜ not started
 
@@ -32,6 +32,23 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ✅ Property type shown on the quote, email text and quote list; can be changed while editing
 - ✅ Quick estimate from the total square footage (⚡ Quick / 📐 Room by room switch; quote says it's a ballpark)
 - ✅ Property type does not change pricing rules for now (owner: "everything else is good")
+
+## Phase 1c — Business tools (run the whole company, not just quotes) 🔄
+
+- ✅ Job status for every quote: Draft → Sent → Won → Scheduled → Completed → Paid (or Lost), with dates
+- ✅ Quotes auto-marked "Sent" when emailed, texted, copied or saved as PDF
+- ✅ Payments received per job (date, amount, method) with balance owed
+- ✅ Real job costs: hours worked, paint & materials, crew/helper pay, other costs
+- ✅ Per-job "You made" and real $/hour; compares actual vs estimated hours
+- ✅ Jobs list with filters (Quotes / Won / Done / Paid / Lost), search and "owed" flags
+- ✅ Business expenses (gas, tools, insurance…) that come off yearly profit
+- ✅ Stats page per year: what you made, collected, margin, jobs done, avg job, $/hour, win rate, owed to you, pipeline, upcoming jobs
+- ✅ Monthly money chart (with table view), residential vs commercial split, smart insights
+- ✅ Exports for the accountant (jobs, payments, expenses spreadsheets)
+- ✅ Backup & restore so history is never lost; data stays private on the device
+- ⬜ Merge to `main` so it goes live
+- ⬜ Compare with bidbrush.pro feature by feature (owner to send screenshots; site is blocked from Claude's environment)
+- ⬜ Ideas next: customer list with job history, job photos, calendar view, invoices, deposit links
 
 ## Phase 2 — Get it online and in painters' hands 🔄
 
@@ -86,6 +103,8 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 | 2026-11-13 | Drop the BidBrush name | Owner found bidbrush.pro; a painter estimating app called BrushBid also exists, so trademark and search confusion risk |
 | 2026-11-13 | Name: **Coatwright** | "Wright" = skilled craftsman; sounds established, made-up word so easier to trademark; no painting app or business found with it |
 | 2026-11-13 | Domain not required yet | Free github.io link is fine for testing; buy coatwright.com (~$10–20/yr) before marketing |
+| 2026-11-13 | Profit counted when money is collected (payment dates); job costs count when the job is done | Matches how a small business sees cash; simple for the owner and accountant |
+| 2026-11-13 | Data stays on the device, with backup/restore and CSV exports | Private and free now; cloud sync comes with accounts in Phase 4 |
 | 2026-11-12 | Name: **BidBrush** (replaced) | Says what it does (bids) and who it's for (painters); short and works as a social handle |
 
 ## Log
@@ -107,3 +126,5 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
   Owner picked **Coatwright**. Renamed the app and folder (`coatwright/`). Added a small "Made with Coatwright" line to quotes.
 - **2026-11-13** — Name check for Coatwright came up clear. Merged pull request #1 into `main`.
 - **2026-11-13** — Owner turned on GitHub Pages. Deployment succeeded; the app is live.
+- **2026-11-13** — Built business tools: job status, payments, real costs, expenses, yearly stats with chart and insights,
+  accountant exports, backup/restore. 21 tests passing; full job lifecycle tested on a simulated iPhone.
