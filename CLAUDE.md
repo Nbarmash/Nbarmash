@@ -11,4 +11,4 @@ same commit:
 - add any decision to "Decisions made"
 - add a dated entry to the "Log"
 
-Tests: `node --test coatwright/tests/pricing.test.js`
+Tests: `node --test coatwright/tests/pricing.test.js coatwright/tests/stats.test.js`
