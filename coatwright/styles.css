@@ -240,6 +240,9 @@ input:focus, textarea:focus { outline: 2px solid var(--brand); outline-offset: -
 /* Settings */
 .logo-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 
+/* Outside & floors */
+.dims.two { grid-template-columns: 1fr 1fr; }
+
 /* ---------- Business tools ---------- */
 .top-actions { display: flex; gap: 2px; }
 .center-text { text-align: center; }

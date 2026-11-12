@@ -355,7 +355,7 @@
         (unit === '$' ? '<em>$</em>' : '') + '<input type="number" inputmode="decimal" min="0" step="any" data-field="actuals.' + key +
         '" value="' + esc(a[key] == null ? '' : a[key]) + '" placeholder="' + ph + '">' + (unit !== '$' ? '<em>' + unit + '</em>' : '') + '</div></label>';
     };
-    return '<section class="card money-card"><h2 class="card-title"><span class="step">4</span> Payments & real costs</h2>' +
+    return '<section class="card money-card"><h2 class="card-title"><span class="step">5</span> Payments & real costs</h2>' +
       '<div class="label" style="margin-top:0">Payments received</div>' +
       (job.payments.length ? job.payments.map(function (p, i) {
         return '<div class="pay-row"><input type="date" data-field="payments.' + i + '.date" value="' + esc(p.date) + '" aria-label="Payment date">' +
@@ -372,8 +372,88 @@
       '<div data-out="result">' + resultBox(job) + '</div></section>';
   }
 
+  // ---------- Outside & floors ----------
+  function oSeg(i, field, current, options) {
+    return '<div class="segmented">' + options.map(function (o) {
+      return '<button type="button" class="' + (String(current) === String(o[0]) ? 'on' : '') + '" data-action="o-seg" data-i="' + i +
+        '" data-field="' + field + '" data-v="' + o[0] + '">' + o[1] + '</button>';
+    }).join('') + '</div>';
+  }
+  function oStep(i, field, value, label) {
+    return '<div class="stepper"><span class="stepper-label">' + label + '</span>' +
+      '<button type="button" data-action="o-step" data-i="' + i + '" data-field="' + field + '" data-d="-1" aria-label="Fewer ' + label + '">−</button>' +
+      '<output>' + (Math.round(Number(value)) || 0) + '</output>' +
+      '<button type="button" data-action="o-step" data-i="' + i + '" data-field="' + field + '" data-d="1" aria-label="More ' + label + '">＋</button></div>';
+  }
+  function oNum(i, field, value, label, unit) {
+    return numField('outside.' + i + '.' + field, value, label, unit);
+  }
+  var COATS_12 = [[1, '1 coat'], [2, '2 coats']];
+  var CONDITION_3 = [['good', 'Good'], ['fair', 'Fair'], ['poor', 'Rough']];
+
+  function outsideCard(item, i, c) {
+    var body = '';
+    switch (item.type) {
+      case 'house':
+        var su = item.surfaces || {};
+        body = '<div class="dims two">' + oNum(i, 'sqft', item.sqft, 'Home size', 'sq ft') + '</div>' +
+          '<div class="label">Stories</div>' + oSeg(i, 'stories', item.stories, [[1, '1'], [2, '2'], [3, '3']]) +
+          '<div class="label">Siding</div>' + oSeg(i, 'siding', item.siding, Object.keys(P.SIDING).map(function (k) { return [k, P.SIDING[k].label]; })) +
+          '<div class="label">What are we painting?</div><div class="chips">' + [['siding', 'Siding'], ['trim', 'Trim'], ['soffits', 'Soffits']].map(function (o) {
+            var on = su[o[0]];
+            return '<button type="button" class="chip toggle' + (on ? ' on' : '') + '" aria-pressed="' + !!on + '" data-action="o-surface" data-i="' + i +
+              '" data-v="' + o[0] + '">' + (on ? '✓ ' : '') + o[1] + '</button>';
+          }).join('') + '</div>' +
+          '<div class="row2">' + oStep(i, 'windows', item.windows, 'Windows') + oStep(i, 'doors', item.doors, 'Doors') + '</div>' +
+          '<div class="row2"><div><div class="label">Coats</div>' + oSeg(i, 'coats', item.coats, [[1, '1'], [2, '2']]) + '</div>' +
+          '<div><div class="label">Condition</div>' + oSeg(i, 'condition', item.condition, CONDITION_3) + '</div></div>';
+        break;
+      case 'deck':
+        body = '<div class="dims two">' + oNum(i, 'sqft', item.sqft, 'Deck size', 'sq ft') + oNum(i, 'railing', item.railing, 'Railing', 'ft') + '</div>' +
+          '<div class="row2"><div><div class="label">Coats</div>' + oSeg(i, 'coats', item.coats, [[1, '1'], [2, '2']]) + '</div>' +
+          '<div><div class="label">Condition</div>' + oSeg(i, 'condition', item.condition, CONDITION_3) + '</div></div>';
+        break;
+      case 'fence':
+        body = '<div class="dims two">' + oNum(i, 'length', item.length, 'Fence length', 'ft') + '</div>' +
+          '<div class="label">Height</div>' + oSeg(i, 'height', item.height, [[4, '4 ft'], [6, '6 ft'], [8, '8 ft']]) +
+          '<div class="label">Sides</div>' + oSeg(i, 'sides', item.sides, [[1, 'One side'], [2, 'Both sides']]) +
+          '<div class="row2"><div><div class="label">Coats</div>' + oSeg(i, 'coats', item.coats, [[1, '1'], [2, '2']]) + '</div>' +
+          '<div><div class="label">Condition</div>' + oSeg(i, 'condition', item.condition, CONDITION_3) + '</div></div>';
+        break;
+      case 'door':
+      case 'shutters':
+        body = oStep(i, 'count', item.count, item.type === 'door' ? 'Doors' : 'Shutters') +
+          '<div class="label">Coats</div>' + oSeg(i, 'coats', item.coats, COATS_12);
+        break;
+      case 'garagedoor':
+        body = oStep(i, 'count', item.count, 'Garage doors') +
+          '<div class="label">Size</div>' + oSeg(i, 'size', item.size, [['single', 'Single'], ['double', 'Double']]) +
+          '<div class="label">Coats</div>' + oSeg(i, 'coats', item.coats, COATS_12);
+        break;
+      case 'floor':
+        var garage = /garage/i.test(item.name);
+        body = (garage ? '<div class="label">Garage size</div><div class="chips">' + Object.keys(P.GARAGE_SIZES).concat('custom').map(function (k) {
+            var g = P.GARAGE_SIZES[k];
+            return '<button type="button" class="chip' + (item.size === k ? ' on' : '') + '" data-action="o-size" data-i="' + i + '" data-v="' + k + '">' +
+              (g ? g.label + '<span>' + g.length + '×' + g.width + '</span>' : 'Exact<span>measure</span>') + '</button>';
+          }).join('') + '</div>' : '') +
+          '<div class="dims two">' + oNum(i, 'length', item.length, 'Length', 'ft') + oNum(i, 'width', item.width, 'Width', 'ft') + '</div>' +
+          '<div class="label">Coating</div>' + oSeg(i, 'system', item.system, Object.keys(P.FLOOR_SYSTEMS).map(function (k) { return [k, P.FLOOR_SYSTEMS[k].label]; })) +
+          (item.system === 'paint' ? '<div class="label">Coats</div>' + oSeg(i, 'coats', item.coats, COATS_12) : '') +
+          '<div class="label">Concrete condition</div>' + oSeg(i, 'condition', item.condition, [['good', 'Good'], ['poor', 'Cracks / oil stains']]);
+        break;
+    }
+    return '<section class="card room-card out-card">' +
+      '<div class="room-head"><input class="room-name" data-field="outside.' + i + '.name" value="' + esc(item.name) + '" aria-label="Item name">' +
+      '<div class="room-price" data-out="out-price-' + i + '">' + money0(c.price) + '</div></div>' + body +
+      '<div class="room-foot"><span class="muted small" data-out="out-meta-' + i + '">' + outMeta(c) + '</span>' +
+      '<span><button type="button" class="link danger" data-action="del-out" data-i="' + i + '">Remove</button></span></div></section>';
+  }
+  function outMeta(c) { return Math.round(c.hours * 10) / 10 + ' hrs labor'; }
+
   function renderJob(job) {
     if (!job.quick) job.quick = P.newQuick();
+    if (!job.outside) job.outside = [];
     if (!job.payments) job.payments = [];
     if (!job.actuals) job.actuals = {};
     var quick = job.mode === 'quick';
@@ -398,7 +478,7 @@
       propertyPicker(job) +
       '</section>' +
 
-      '<h2 class="section-title"><span class="step">2</span> ' + (quick ? 'Size of the job' : 'Rooms') + '</h2>' +
+      '<h2 class="section-title"><span class="step">2</span> ' + (quick ? 'Inside: size of the job' : 'Inside: rooms') + '</h2>' +
       '<div class="segmented mode-switch">' +
       '<button type="button" class="' + (quick ? 'on' : '') + '" data-action="mode" data-v="quick">⚡ Quick (by sq ft)</button>' +
       '<button type="button" class="' + (quick ? '' : 'on') + '" data-action="mode" data-v="rooms">📐 Room by room</button></div>' +
@@ -410,7 +490,15 @@
           '<div class="room-types">' + moreTypes.join('') + '</div></details>' : '') +
         '</section>') +
 
-      '<details class="card"' + (job.extras.length || job.discount || job.notes ? ' open' : '') + '><summary class="card-title"><span class="step">3</span> Extras, discount & notes <em class="muted small">(optional)</em></summary>' +
+      '<h2 class="section-title"><span class="step">3</span> Outside & floors <em class="muted small">(optional)</em></h2>' +
+      job.outside.map(function (it, i) { return outsideCard(it, i, calc.outside[i]); }).join('') +
+      '<section class="card add-room"><div class="label">' + (job.outside.length ? 'Add more' : 'Exterior, deck, fence, garage floor…') + '</div>' +
+      '<div class="room-types">' + P.OUTSIDE_TYPES.map(function (t, k) {
+        var nm = (commercial && t.commercialName) || t.name;
+        return '<button type="button" data-action="add-out" data-k="' + k + '"><span>' + t.icon + '</span>' + esc(nm) + '</button>';
+      }).join('') + '</div></section>' +
+
+      '<details class="card"' + (job.extras.length || job.discount || job.notes ? ' open' : '') + '><summary class="card-title"><span class="step">4</span> Extras, discount & notes <em class="muted small">(optional)</em></summary>' +
       job.extras.map(function (e, i) {
         return '<div class="extra-row"><input data-field="extras.' + i + '.label" value="' + esc(e.label) + '" placeholder="e.g. Drywall repair" aria-label="Extra item">' +
           '<div class="with-unit pre"><em>$</em><input type="number" inputmode="decimal" min="0" data-field="extras.' + i + '.price" value="' + esc(e.price) + '" aria-label="Price"></div>' +
@@ -436,6 +524,12 @@
       if (p) p.textContent = money0(c.price);
       var m = app.querySelector('[data-out="room-meta-' + i + '"]');
       if (m) m.textContent = roomMeta(c);
+    });
+    (calc.outside || []).forEach(function (c, i) {
+      var p = app.querySelector('[data-out="out-price-' + i + '"]');
+      if (p) p.textContent = money0(c.price);
+      var m = app.querySelector('[data-out="out-meta-' + i + '"]');
+      if (m) m.textContent = outMeta(c);
     });
     var t = app.querySelector('[data-out="total"]');
     if (t) t.textContent = money(calc.total);
@@ -463,7 +557,7 @@
     var s = settings, cu = job.customer;
     var valid = new Date(job.updatedAt + (Number(s.validDays) || 30) * 864e5);
     var rows = '';
-    q.rooms.forEach(function (r) {
+    q.rooms.concat(q.outside || []).forEach(function (r) {
       if (!r.lines.length) return;
       rows += '<tr class="group"><td colspan="2">' + esc(r.name) + '<span class="muted small"> · ' +
         esc(r.summary) + '</span></td></tr>';
@@ -513,7 +607,7 @@
     out.push('Thank you for the opportunity! Here is your painting estimate (' + job.number + ').');
     if (P.propertyLabel(job)) out.push('Property: ' + P.propertyLabel(job) + (cu.address ? ' — ' + cu.address : ''));
     out.push('');
-    q.rooms.forEach(function (r) {
+    q.rooms.concat(q.outside || []).forEach(function (r) {
       if (!r.lines.length) return;
       out.push(r.name.toUpperCase() + ' — ' + money(r.price));
       r.lines.forEach(function (l) { out.push('  • ' + l.label + ' (' + l.detail + '): ' + money(l.price)); });
@@ -788,6 +882,13 @@
       setField('primerPrice', 'Primer', { type: 'number', pre: '$' }) + '</div>' +
       setField('suppliesPct', 'Supplies (tape, plastic, caulk…)', { type: 'number', unit: '% of paint' }) + '</section>' +
 
+      '<section class="card"><h2 class="card-title">Exterior & floor products <em class="muted small">(your cost)</em></h2>' +
+      '<div class="row2">' + setField('extPaintPrice', 'Exterior paint', { type: 'number', pre: '$', unit: '/gal' }) +
+      setField('stainPrice', 'Deck & fence stain', { type: 'number', pre: '$', unit: '/gal' }) + '</div>' +
+      '<div class="row2">' + setField('floorPaintPrice', 'Floor paint', { type: 'number', pre: '$', unit: '/gal' }) +
+      setField('epoxySqft', 'Epoxy kit', { type: 'number', pre: '$', unit: '/sq ft' }) + '</div>' +
+      '<div class="row2">' + setField('flakeSqft', 'Epoxy + flake kit', { type: 'number', pre: '$', unit: '/sq ft' }) + '</div></section>' +
+
       '<details class="card"><summary class="card-title">How fast you work <em class="muted small">(advanced)</em></summary>' +
       '<p class="muted small">Per coat, for one painter. The defaults suit most painters — adjust once you\'ve timed a few jobs.</p>' +
       '<div class="row2">' + setField('wallRate', 'Walls', { type: 'number', unit: 'sq ft/hr' }) +
@@ -795,7 +896,11 @@
       '<div class="row2">' + setField('trimRate', 'Trim', { type: 'number', unit: 'ft/hr' }) +
       setField('doorHours', 'Each door', { type: 'number', unit: 'hrs' }) + '</div>' +
       '<div class="row2">' + setField('coverage', 'Paint coverage', { type: 'number', unit: 'sq ft/gal' }) +
-      setField('setupHours', 'Prep & cleanup', { type: 'number', unit: 'hrs/room' }) + '</div></details>' +
+      setField('setupHours', 'Prep & cleanup', { type: 'number', unit: 'hrs/room' }) + '</div>' +
+      '<div class="row2">' + setField('extWallRate', 'Exterior siding', { type: 'number', unit: 'sq ft/hr' }) +
+      setField('deckRate', 'Decks', { type: 'number', unit: 'sq ft/hr' }) + '</div>' +
+      '<div class="row2">' + setField('fenceRate', 'Fences', { type: 'number', unit: 'sq ft/hr' }) +
+      setField('floorRate', 'Floor paint', { type: 'number', unit: 'sq ft/hr' }) + '</div></details>' +
 
       '<section class="card"><h2 class="card-title">Quote fine print</h2>' +
       setField('terms', 'Terms shown on every quote', { textarea: true }) + '</section>' +
@@ -880,6 +985,11 @@
     var path = el.dataset.field;
     var val = el.type === 'number' ? (el.value === '' ? '' : Number(el.value)) : el.value;
     setPath(job, path, val);
+    var om = path.match(/^outside\.(\d+)\.(length|width)$/);
+    if (om && job.outside[+om[1]].size && job.outside[+om[1]].size !== 'custom') {
+      job.outside[+om[1]].size = 'custom';
+      el.closest('.out-card').querySelectorAll('[data-action="o-size"]').forEach(function (b) { b.classList.toggle('on', b.dataset.v === 'custom'); });
+    }
     // Typing exact dimensions switches the size to "Exact"
     var m = path.match(/^rooms\.(\d+)\.(length|width)$/);
     if (m) {
@@ -991,6 +1101,44 @@
       case 'q-seg': {
         var qf = el.dataset.field;
         job.quick[qf] = qf === 'condition' ? el.dataset.v : +el.dataset.v;
+        touch(job); renderJob(job);
+        return;
+      }
+      case 'add-out': {
+        var oi = P.newOutside(P.OUTSIDE_TYPES[+el.dataset.k], job);
+        job.outside.push(oi);
+        touch(job); renderJob(job);
+        var oc = app.querySelectorAll('.out-card');
+        oc[oc.length - 1].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        toast(oi.name + ' added');
+        return;
+      }
+      case 'del-out':
+        if (!confirm('Remove ' + job.outside[i].name + '?')) return;
+        job.outside.splice(i, 1);
+        touch(job); renderJob(job);
+        return;
+      case 'o-seg': {
+        var of = el.dataset.field, ov = el.dataset.v;
+        job.outside[i][of] = ['siding', 'system', 'condition', 'size'].indexOf(of) !== -1 ? ov : +ov;
+        touch(job); renderJob(job);
+        return;
+      }
+      case 'o-surface':
+        job.outside[i].surfaces[el.dataset.v] = !job.outside[i].surfaces[el.dataset.v];
+        touch(job); renderJob(job);
+        return;
+      case 'o-step': {
+        var it2 = job.outside[i], f2 = el.dataset.field;
+        it2[f2] = Math.max(0, (Math.round(Number(it2[f2])) || 0) + Number(el.dataset.d));
+        el.parentNode.querySelector('output').textContent = it2[f2];
+        touch(job); refreshTotals(job);
+        return;
+      }
+      case 'o-size': {
+        var it3 = job.outside[i], g = P.GARAGE_SIZES[el.dataset.v];
+        it3.size = el.dataset.v;
+        if (g) { it3.length = g.length; it3.width = g.width; }
         touch(job); renderJob(job);
         return;
       }

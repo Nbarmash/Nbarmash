@@ -41,7 +41,18 @@
     terms: 'Price includes all labor and materials listed. Furniture moving, ' +
       'masking and full cleanup included. Any additional work will be quoted ' +
       'before it starts. Balance due on completion.',
-    nextNumber: 1001
+    nextNumber: 1001,
+
+    // Exterior & floors
+    extPaintPrice: 60,    // $ per gallon exterior paint
+    stainPrice: 45,       // $ per gallon deck/fence stain
+    floorPaintPrice: 55,  // $ per gallon 1-part floor paint
+    extWallRate: 125,     // sq ft of siding per hour, per coat
+    deckRate: 100,        // sq ft of deck per hour, per coat
+    fenceRate: 150,       // sq ft of fence per hour, per coat
+    floorRate: 150,       // sq ft of floor paint per hour, per coat
+    epoxySqft: 1.0,       // $ per sq ft for a 2-part epoxy kit
+    flakeSqft: 2.0,       // $ per sq ft for epoxy + flakes + clear coat
   };
 
   var SIZES = {
@@ -336,13 +347,183 @@
     };
   }
 
+  // ---------- Exterior & floors ----------
+  var SIDING = {
+    smooth: { label: 'Vinyl / smooth', labor: 1, coverage: 350 },
+    wood: { label: 'Wood / lap', labor: 1.15, coverage: 300 },
+    masonry: { label: 'Stucco / brick', labor: 1.3, coverage: 200 }
+  };
+  var STORY_FACTOR = { 1: 1, 2: 1.25, 3: 1.5 };
+  var FLOOR_SYSTEMS = {
+    paint: { label: 'Floor paint' },
+    epoxy: { label: 'Epoxy' },
+    flake: { label: 'Epoxy + flakes' }
+  };
+  var GARAGE_SIZES = {
+    '1': { label: '1-car', length: 12, width: 22 },
+    '2': { label: '2-car', length: 20, width: 22 },
+    '3': { label: '3-car', length: 30, width: 22 }
+  };
+
+  var OUTSIDE_TYPES = [
+    { type: 'house', name: 'Whole House Exterior', commercialName: 'Building Exterior', icon: '🏡' },
+    { type: 'deck', name: 'Deck', icon: '🪵' },
+    { type: 'fence', name: 'Fence', icon: '🚧' },
+    { type: 'door', name: 'Entry Doors', icon: '🚪' },
+    { type: 'garagedoor', name: 'Garage Door', icon: '🚘' },
+    { type: 'shutters', name: 'Shutters', icon: '🪟' },
+    { type: 'floor', name: 'Garage Floor', commercialName: 'Shop / Warehouse Floor', icon: '🚗', size: '2', length: 20, width: 22,
+      commercialLength: 60, commercialWidth: 40 },
+    { type: 'floor', name: 'Basement Floor', icon: '🧱', size: 'custom', length: 30, width: 25 },
+    { type: 'floor', name: 'Porch / Patio Floor', icon: '🪑', size: 'custom', length: 12, width: 10 }
+  ];
+
+  function newOutside(t, job) {
+    var commercial = job && job.jobType === 'commercial';
+    var base = { id: Math.random().toString(36).slice(2, 10), type: t.type,
+      name: (commercial && t.commercialName) || t.name, coats: 2, condition: 'good' };
+    var homeSqft = job && job.quick && num(job.quick.sqft) ? num(job.quick.sqft) : (commercial ? 5000 : 2000);
+    switch (t.type) {
+      case 'house':
+        return Object.assign(base, { sqft: homeSqft, stories: commercial ? 1 : 2, siding: 'smooth',
+          windows: Math.round(homeSqft / 120), doors: 2, surfaces: { siding: true, trim: true, soffits: false } });
+      case 'deck': return Object.assign(base, { sqft: 300, railing: 40, coats: 1 });
+      case 'fence': return Object.assign(base, { length: 150, height: 6, sides: 1, coats: 1 });
+      case 'door': return Object.assign(base, { count: 1 });
+      case 'garagedoor': return Object.assign(base, { count: 1, size: 'double' });
+      case 'shutters': return Object.assign(base, { count: 4 });
+      case 'floor': return Object.assign(base, { system: 'epoxy', coats: 2,
+        size: commercial && t.commercialLength ? 'custom' : t.size,
+        length: commercial && t.commercialLength ? t.commercialLength : t.length,
+        width: commercial && t.commercialWidth ? t.commercialWidth : t.width });
+    }
+    return base;
+  }
+
+  /** Labor, paint and direct materials for one exterior or floor item (costs, no markup). */
+  function calcOutside(item, settings) {
+    var s = Object.assign({}, DEFAULT_SETTINGS, settings);
+    var rate = num(s.laborRate);
+    var coats = Math.round(num(item.coats, 2)) || 1;
+    var coatTxt = coats + (coats === 1 ? ' coat' : ' coats');
+    var cond = CONDITIONS[item.condition] || CONDITIONS.good;
+    var lines = [], gallons = { ext: 0, stain: 0, floor: 0, primer: 0 }, direct = [];
+    var fmt = function (n) { return Math.round(n).toLocaleString('en-US'); };
+    function add(key, label, detail, hours) {
+      hours = round2(hours);
+      if (hours > 0) lines.push({ key: key, label: label, detail: detail, hours: hours, laborCost: round2(hours * rate) });
+    }
+    var summary = '';
+
+    if (item.type === 'house') {
+      var stories = Math.min(3, Math.max(1, Math.round(num(item.stories, 1)) || 1));
+      var sf = STORY_FACTOR[stories];
+      var siding = SIDING[item.siding] || SIDING.smooth;
+      var area = num(item.sqft);
+      var fp = area / stories;
+      var L = Math.sqrt(fp * 1.4), W = L ? fp / L : 0;
+      var perim = 2 * (L + W);
+      var windows = Math.round(num(item.windows)), doors = Math.round(num(item.doors));
+      var wall = Math.max(0, perim * 9 * stories * 1.1 - windows * 15 - doors * 21);
+      var su = item.surfaces || {};
+      if (area > 0 && (su.siding || su.trim || su.soffits)) {
+        add('wash', 'Power wash & prep', fmt(wall) + ' sq ft (est.)', wall / 400 * sf);
+        if (cond.primer) {
+          add('scrape', 'Scrape, sand & spot-prime', 'Loose paint and bare spots', wall / 250 * sf);
+          gallons.primer += wall * 0.3 / siding.coverage;
+        }
+      }
+      if (su.siding && wall > 0) {
+        add('siding', 'Siding / walls', fmt(wall) + ' sq ft (est.) · ' + siding.label + ' · ' + coatTxt,
+          wall * coats / (num(s.extWallRate) || 125) * siding.labor * cond.labor * sf);
+        gallons.ext += wall * coats / siding.coverage;
+      }
+      if (su.trim && perim > 0) {
+        var trimLF = perim + windows * 14 + doors * 17;
+        add('trim', 'Trim, fascia & window frames', fmt(trimLF) + ' linear ft (est.) · ' + coatTxt,
+          trimLF * coats / (num(s.trimRate) || 50) * cond.labor * sf);
+        gallons.ext += trimLF * coats / 300;
+      }
+      if (su.soffits && perim > 0) {
+        var soffit = perim * 1.5;
+        add('soffits', 'Soffits & overhangs', fmt(soffit) + ' sq ft (est.) · ' + coatTxt,
+          soffit * coats / ((num(s.ceilingRate) || 140) * 0.8) * sf);
+        gallons.ext += soffit * coats / 350;
+      }
+      if (lines.length) add('setup', 'Ladders, masking & cleanup', stories + (stories === 1 ? ' story' : ' stories'), 2 * stories);
+      summary = fmt(area) + ' sq ft home, ' + stories + (stories === 1 ? ' story' : ' stories') + ', ' + siding.label.toLowerCase();
+    } else if (item.type === 'deck') {
+      var deck = num(item.sqft), rail = num(item.railing);
+      if (deck > 0) {
+        add('wash', 'Wash & prep deck', fmt(deck) + ' sq ft', deck / 300);
+        add('deck', 'Deck floor', fmt(deck) + ' sq ft · ' + coatTxt, deck * coats / (num(s.deckRate) || 100) * cond.labor);
+        gallons.stain += deck * coats / 200;
+      }
+      if (rail > 0) {
+        add('railing', 'Railings & spindles', fmt(rail) + ' linear ft · ' + coatTxt, rail * coats / 15 * cond.labor);
+        gallons.stain += rail * coats / 50;
+      }
+      summary = fmt(deck) + ' sq ft' + (rail ? ', ' + fmt(rail) + ' ft of railing' : '');
+    } else if (item.type === 'fence') {
+      var sides = Math.round(num(item.sides, 1)) === 2 ? 2 : 1;
+      var farea = num(item.length) * num(item.height, 6) * sides;
+      if (farea > 0) {
+        add('wash', 'Wash & prep fence', fmt(farea) + ' sq ft', farea / 500);
+        add('fence', 'Fence', fmt(num(item.length)) + ' ft long × ' + num(item.height, 6) + ' ft · ' +
+          (sides === 2 ? 'both sides' : 'one side') + ' · ' + coatTxt, farea * coats / (num(s.fenceRate) || 150) * cond.labor);
+        gallons.stain += farea * coats / 250;
+      }
+      summary = fmt(num(item.length)) + ' ft, ' + num(item.height, 6) + ' ft tall';
+    } else if (item.type === 'door') {
+      var dn = Math.round(num(item.count));
+      add('doors', 'Entry doors & frames', dn + (dn === 1 ? ' door' : ' doors') + ' · ' + coatTxt, dn * 1.0 * coats * cond.labor);
+      gallons.ext += dn * 0.15 * coats;
+      summary = dn + (dn === 1 ? ' door' : ' doors');
+    } else if (item.type === 'garagedoor') {
+      var gn = Math.round(num(item.count)), dbl = item.size !== 'single';
+      add('garagedoor', 'Garage door' + (gn === 1 ? '' : 's'), gn + ' × ' + (dbl ? 'double' : 'single') + ' · ' + coatTxt,
+        gn * (dbl ? 1.75 : 1.25) * coats * cond.labor);
+      gallons.ext += gn * (dbl ? 0.6 : 0.35) * coats;
+      summary = gn + ' ' + (dbl ? 'double' : 'single') + (gn === 1 ? ' door' : ' doors');
+    } else if (item.type === 'shutters') {
+      var sn = Math.round(num(item.count));
+      add('shutters', 'Shutters', sn + (sn === 1 ? ' shutter' : ' shutters') + ' · ' + coatTxt, sn * 0.5 * coats * cond.labor);
+      gallons.ext += sn * 0.08 * coats;
+      summary = sn + ' shutters';
+    } else if (item.type === 'floor') {
+      var farea2 = num(item.length) * num(item.width);
+      var sys = item.system || 'epoxy';
+      if (farea2 > 0) {
+        if (cond.primer) add('repair', 'Crack & oil-stain repair', fmt(farea2) + ' sq ft', farea2 / 300);
+        if (sys === 'paint') {
+          add('prep', 'Degrease & etch concrete', fmt(farea2) + ' sq ft', farea2 / 250);
+          add('floor', 'Floor paint', fmt(farea2) + ' sq ft · ' + coatTxt, farea2 * coats / (num(s.floorRate) || 150));
+          gallons.floor += farea2 * coats / 300;
+        } else {
+          add('prep', 'Grind / etch concrete', fmt(farea2) + ' sq ft', farea2 / 150);
+          add('floor', sys === 'flake' ? 'Epoxy base, flakes & clear coat' : 'Epoxy coating',
+            fmt(farea2) + ' sq ft', farea2 / (sys === 'flake' ? 45 : 70));
+          direct.push({ key: sys, label: sys === 'flake' ? 'Epoxy flake system (base, flakes, clear coat)' : '2-part epoxy coating',
+            sqft: farea2, cost: round2(farea2 * num(sys === 'flake' ? s.flakeSqft : s.epoxySqft)) });
+        }
+      }
+      summary = num(item.length) + '×' + num(item.width) + ' ft, ' + (FLOOR_SYSTEMS[sys] || FLOOR_SYSTEMS.epoxy).label.toLowerCase();
+    }
+
+    var hours = 0, laborCost = 0;
+    lines.forEach(function (l) { hours += l.hours; laborCost += l.laborCost; });
+    return { lines: lines, gallons: gallons, direct: direct, summary: summary,
+      hours: round2(hours), laborCost: round2(laborCost) };
+  }
+
   /** Full itemized quote for a job. */
   function calcJob(job, settings) {
     var s = Object.assign({}, DEFAULT_SETTINGS, settings);
     var mk = 1 + num(s.markup) / 100;
     var quickMode = job.mode === 'quick';
 
-    var totalGallons = { wall: 0, ceiling: 0, trim: 0, primer: 0 };
+    var totalGallons = { wall: 0, ceiling: 0, trim: 0, primer: 0, ext: 0, stain: 0, floor: 0 };
+    var directTotals = {};
     var source = quickMode
       ? [{ id: 'quick', name: job.jobType === 'commercial' ? 'Whole space' : 'Whole home', quick: true }]
       : (job.rooms || []);
@@ -351,18 +532,34 @@
       c.summary = room.quick
         ? Math.round(c.floorArea).toLocaleString('en-US') + ' sq ft, ' + c.height + ' ft ceilings'
         : c.length + '×' + c.width + ' ft, ' + c.height + ' ft ceilings';
-      Object.keys(totalGallons).forEach(function (k) { totalGallons[k] += c.gallons[k]; });
+      Object.keys(totalGallons).forEach(function (k) { totalGallons[k] += c.gallons[k] || 0; });
       var lines = c.lines.map(function (l) { return Object.assign({}, l, { price: round2(l.laborCost * mk) }); });
       var price = 0;
       lines.forEach(function (l) { price += l.price; });
       return Object.assign({}, c, { id: room.id, name: room.name || 'Room', lines: lines, price: round2(price) });
     });
 
+    var outside = (job.outside || []).map(function (item) {
+      var c = calcOutside(item, s);
+      Object.keys(c.gallons).forEach(function (k) { totalGallons[k] += c.gallons[k] || 0; });
+      c.direct.forEach(function (d) {
+        var t = directTotals[d.key] || (directTotals[d.key] = { key: d.key, label: d.label, sqft: 0, cost: 0 });
+        t.sqft += d.sqft; t.cost += d.cost;
+      });
+      var lines = c.lines.map(function (l) { return Object.assign({}, l, { price: round2(l.laborCost * mk) }); });
+      var price = 0;
+      lines.forEach(function (l) { price += l.price; });
+      return Object.assign({}, c, { id: item.id, name: item.name || 'Exterior', outside: true, lines: lines, price: round2(price) });
+    });
+
     var products = [
       ['wall', 'Wall paint', s.wallPaintPrice],
       ['ceiling', 'Ceiling paint', s.ceilingPaintPrice],
       ['trim', 'Trim & door paint (semi-gloss)', s.trimPaintPrice],
-      ['primer', 'Primer', s.primerPrice]
+      ['primer', 'Primer', s.primerPrice],
+      ['ext', 'Exterior paint', s.extPaintPrice],
+      ['stain', 'Deck & fence stain', s.stainPrice],
+      ['floor', 'Floor paint', s.floorPaintPrice]
     ];
     var materials = [];
     var paintCost = 0;
@@ -375,6 +572,12 @@
       materials.push({ key: p[0], label: p[1], detail: qty + (qty === 1 ? ' gallon' : ' gallons'),
         qty: qty, cost: cost, price: round2(cost * mk) });
     });
+    Object.keys(directTotals).forEach(function (k) {
+      var d = directTotals[k];
+      var dc = round2(d.cost);
+      materials.push({ key: k, label: d.label, detail: Math.round(d.sqft).toLocaleString('en-US') + ' sq ft kit',
+        qty: 1, cost: dc, price: round2(dc * mk) });
+    });
     if (paintCost > 0 && num(s.suppliesPct) > 0) {
       var supCost = round2(paintCost * num(s.suppliesPct) / 100);
       materials.push({ key: 'supplies', label: 'Supplies', detail: 'Tape, plastic, caulk, patch, rollers',
@@ -385,7 +588,7 @@
       .map(function (e) { return { label: e.label || 'Additional work', price: round2(num(e.price)) }; });
 
     var sum = function (arr, key) { return round2(arr.reduce(function (a, x) { return a + x[key]; }, 0)); };
-    var roomsTotal = sum(rooms, 'price');
+    var roomsTotal = round2(sum(rooms, 'price') + sum(outside, 'price'));
     var materialsTotal = sum(materials, 'price');
     var extrasTotal = sum(extras, 'price');
     var subtotal = round2(roomsTotal + materialsTotal + extrasTotal);
@@ -400,8 +603,8 @@
     var total = round2(taxable + tax);
     var deposit = round2(total * num(s.depositPct) / 100);
 
-    var hours = sum(rooms, 'hours');
-    var laborCost = sum(rooms, 'laborCost');
+    var hours = round2(sum(rooms, 'hours') + sum(outside, 'hours'));
+    var laborCost = round2(sum(rooms, 'laborCost') + sum(outside, 'laborCost'));
     var materialCost = sum(materials, 'cost');
     var cost = round2(laborCost + materialCost);
     var revenue = round2(total - tax);
@@ -410,6 +613,7 @@
     return {
       quick: quickMode,
       rooms: rooms,
+      outside: outside,
       materials: materials,
       extras: extras,
       roomsTotal: roomsTotal,
@@ -447,6 +651,12 @@
     CONDITIONS: CONDITIONS,
     newRoom: newRoom,
     newQuick: newQuick,
+    OUTSIDE_TYPES: OUTSIDE_TYPES,
+    SIDING: SIDING,
+    FLOOR_SYSTEMS: FLOOR_SYSTEMS,
+    GARAGE_SIZES: GARAGE_SIZES,
+    newOutside: newOutside,
+    calcOutside: calcOutside,
     calcRoom: calcRoom,
     calcQuick: calcQuick,
     calcJob: calcJob,

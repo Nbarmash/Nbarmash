@@ -145,3 +145,47 @@ test('new rooms from presets have sensible defaults', () => {
   assert.strictEqual(r.length, 12);
   assert.ok(P.calcJob({ rooms: [r] }, settings).total > 0);
 });
+
+test('every exterior & floor type prices to a sensible amount', () => {
+  P.OUTSIDE_TYPES.forEach(t => {
+    const item = P.newOutside(t, { jobType: 'residential' });
+    const c = P.calcOutside(item, settings);
+    assert.ok(c.hours > 0 && c.laborCost > 0, t.name);
+    assert.ok(Number.isFinite(P.calcJob({ outside: [item] }, settings).total), t.name);
+  });
+});
+
+test('exterior: more stories and rougher siding cost more', () => {
+  const t = P.OUTSIDE_TYPES.find(x => x.type === 'house');
+  const base = P.newOutside(t, { jobType: 'residential' });
+  const one = P.calcOutside(Object.assign({}, base, { stories: 1 }), settings);
+  const two = P.calcOutside(Object.assign({}, base, { stories: 2 }), settings);
+  assert.ok(two.hours > one.hours);
+  const stucco = P.calcOutside(Object.assign({}, base, { siding: 'masonry' }), settings);
+  assert.ok(stucco.hours > P.calcOutside(base, settings).hours);
+  assert.ok(stucco.gallons.ext > P.calcOutside(base, settings).gallons.ext, 'stucco soaks up more paint');
+});
+
+test('garage floor: epoxy kits show as materials; flakes cost more than epoxy; paint uses gallons', () => {
+  const t = P.OUTSIDE_TYPES.find(x => x.name === 'Garage Floor');
+  const epoxy = P.newOutside(t, { jobType: 'residential' });
+  assert.strictEqual(epoxy.length * epoxy.width, 440);
+  const qe = P.calcJob({ outside: [epoxy] }, settings);
+  assert.ok(qe.materials.some(m => m.key === 'epoxy' && m.cost === 440));
+  const qf = P.calcJob({ outside: [Object.assign({}, epoxy, { system: 'flake' })] }, settings);
+  assert.ok(qf.total > qe.total);
+  const qp = P.calcJob({ outside: [Object.assign({}, epoxy, { system: 'paint' })] }, settings);
+  assert.ok(qp.materials.some(m => m.key === 'floor' && m.qty >= 3));
+});
+
+test('outside items add on top of interior, in both quick and room-by-room mode', () => {
+  const t = P.OUTSIDE_TYPES.find(x => x.type === 'house');
+  const quick = Object.assign(P.newQuick(), { sqft: 2000 });
+  const inside = P.calcJob({ mode: 'quick', quick }, settings).total;
+  const both = P.calcJob({ mode: 'quick', quick, outside: [P.newOutside(t, { quick })] }, settings);
+  assert.ok(both.total > inside);
+  assert.strictEqual(both.outside.length, 1);
+  assert.strictEqual(both.outside[0].name, 'Whole House Exterior');
+  // house size defaults to the quick-estimate square footage
+  assert.strictEqual(P.newOutside(t, { quick }).sqft, 2000);
+});
