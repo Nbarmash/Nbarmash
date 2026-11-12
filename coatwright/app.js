@@ -21,6 +21,9 @@
   var settings = Object.assign({}, P.DEFAULT_SETTINGS, load('pq.settings', {}));
   var jobs = load('pq.jobs', []);
   var expenses = load('pq.expenses', []);
+  if (!settings.onboarded && (jobs.length || settings.businessName)) { settings.onboarded = true; save('pq.settings', settings); }
+  var installPrompt = null;
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installPrompt = e; });
   var homeFilter = 'all', homeSearch = '', customerSearch = '', pendingCustomer = null;
 
   function saveSettings() { save('pq.settings', settings); }
@@ -112,9 +115,88 @@
     else if (view === 'new') renderNewJob(P.JOB_TYPES[id] ? id : null);
     else if (view === 'settings') renderSettings();
     else if (view === 'stats') renderStats(+id || new Date().getFullYear());
+    else if (view === 'welcome' && !id && settings.onboarded) { location.hash = '#/'; return; }
+    else if (view === 'welcome') renderWelcome(+id || 0);
+    else if (!settings.onboarded) { location.hash = '#/welcome'; return; }
     else renderHome();
   }
   window.addEventListener('hashchange', function () { route(); window.scrollTo(0, 0); });
+
+  // ---------- First-run onboarding ----------
+  var RATE_PRESETS = [
+    { id: 'new', icon: '🌱', label: 'Just starting out', desc: 'Competitive prices to win your first jobs', laborRate: 45, markup: 20, minimumJob: 350 },
+    { id: 'pro', icon: '🖌️', label: 'Established painter', desc: 'Solid rates for steady, quality work', laborRate: 55, markup: 25, minimumJob: 450 },
+    { id: 'premium', icon: '⭐', label: 'Premium / high-end', desc: 'Top-quality work and service', laborRate: 70, markup: 30, minimumJob: 750 }
+  ];
+
+  function welcomeSteps(step) {
+    return '<div class="wz-dots" aria-label="Step ' + step + ' of 3">' + [1, 2, 3].map(function (n) {
+      return '<span class="' + (n <= step ? 'on' : '') + '"></span>';
+    }).join('') + '</div>';
+  }
+
+  function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
+  function isInstalled() { return window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || navigator.standalone; }
+
+  function renderWelcome(step) {
+    var body;
+    if (step === 0) {
+      body = '<div class="wz-hero"><img src="icon.svg" alt="" width="84" height="84"><h1>Welcome to Coatwright</h1>' +
+        '<p class="muted">Professional paint quotes in minutes, and a clear picture of what you really make.</p></div>' +
+        '<ul class="wz-list"><li><b>⚡ Quote any job fast</b><span>Interior, exterior, cabinets, floors and commercial</span></li>' +
+        '<li><b>📄 Look professional</b><span>Itemized quotes and invoices with your logo</span></li>' +
+        '<li><b>📊 Know your numbers</b><span>Real profit, hourly rate and money owed</span></li></ul>' +
+        '<a class="btn btn-primary btn-xl" href="#/welcome/1">Set up my business</a>' +
+        '<p class="center-text muted small">Takes about 2 minutes · <button class="link" data-action="wz-skip">Skip for now</button></p>';
+    } else if (step === 1) {
+      body = welcomeSteps(1) + '<h1 class="ask">Your business</h1><p class="muted">This goes on every quote and invoice.</p>' +
+        '<section class="card">' +
+        '<div class="logo-row">' + (settings.logo ? '<img src="' + esc(settings.logo) + '" alt="Logo" class="logo">' : '<div class="logo placeholder">Logo</div>') +
+        '<label class="btn btn-ghost">' + (settings.logo ? 'Change logo' : 'Add your logo') + '<input type="file" accept="image/*" id="logo-input" hidden></label></div>' +
+        setField('businessName', 'Business name', { placeholder: 'Smith Painting LLC' }) +
+        setField('ownerName', 'Your name', { placeholder: 'John Smith' }) +
+        '<div class="row2">' + setField('phone', 'Phone', { type: 'tel', placeholder: '(555) 555-5555' }) +
+        setField('email', 'Email', { type: 'email', placeholder: 'you@email.com' }) + '</div></section>' +
+        '<div class="wz-nav"><a class="btn" href="#/welcome/0">Back</a><button class="btn btn-primary" data-action="wz-next" data-v="2">Continue</button></div>';
+    } else if (step === 2) {
+      var active = RATE_PRESETS.find(function (p) { return p.laborRate === Number(settings.laborRate) && p.markup === Number(settings.markup); });
+      body = welcomeSteps(2) + '<h1 class="ask">Your prices</h1><p class="muted">Pick a starting point. Every number can be changed later in Settings.</p>' +
+        '<div class="pick-list">' + RATE_PRESETS.map(function (p) {
+          return '<button type="button" class="pick' + (active === p ? ' picked' : '') + '" data-action="preset" data-v="' + p.id + '">' +
+            '<span class="pick-icon">' + p.icon + '</span><span><strong>' + p.label + '</strong><span class="muted small">' + p.desc +
+            ' · $' + p.laborRate + '/hr, ' + p.markup + '% markup</span></span>' + (active === p ? '<span class="chev">✓</span>' : '') + '</button>';
+        }).join('') + '</div>' +
+        '<section class="card" style="margin-top:14px"><div class="row2">' +
+        setField('laborRate', 'Labor rate', { type: 'number', pre: '$', unit: '/hr' }) + setField('markup', 'Markup', { type: 'number', unit: '%' }) + '</div>' +
+        '<div class="row2">' + setField('minimumJob', 'Minimum job', { type: 'number', pre: '$' }) + setField('depositPct', 'Deposit', { type: 'number', unit: '%' }) + '</div>' +
+        '<p class="muted small" style="margin:0">Paint prices, tax and how fast you work are in Settings too.</p></section>' +
+        '<div class="wz-nav"><a class="btn" href="#/welcome/1">Back</a><button class="btn btn-primary" data-action="wz-next" data-v="3">Continue</button></div>';
+    } else {
+      var install = isInstalled() ? '' : installPrompt
+        ? '<button class="btn full" data-action="install">📲 Install Coatwright on this phone</button>'
+        : isIOS() ? '<p class="wz-tip">📲 <b>Tip:</b> tap the Share button, then <b>Add to Home Screen</b>, to open Coatwright like an app.</p>'
+          : '<p class="wz-tip">📲 <b>Tip:</b> use your browser menu → <b>Install app</b> or <b>Add to Home screen</b> to open Coatwright like an app.</p>';
+      body = welcomeSteps(3) + '<div class="wz-hero"><div class="wz-check">✓</div><h1>You\'re all set' + (settings.ownerName ? ', ' + esc(settings.ownerName.split(' ')[0]) : '') + '!</h1>' +
+        '<p class="muted">Your business details and prices are saved on this phone.</p></div>' +
+        '<button class="btn btn-primary btn-xl" data-action="wz-finish" data-v="quote">＋ Create my first quote</button>' +
+        '<button class="btn full" data-action="wz-finish" data-v="sample">👀 Explore with a sample quote</button>' + install +
+        '<p class="center-text muted small">Your data stays private on this device. <a href="../privacy.html">Privacy</a> · <a href="../terms.html">Terms</a></p>';
+    }
+    app.innerHTML = '<div class="welcome">' + body + '</div>';
+    var input = document.getElementById('logo-input');
+    if (input) input.addEventListener('change', onLogo);
+  }
+
+  function createSampleJob() {
+    pendingCustomer = { name: 'Sample Customer', phone: '', email: '', address: '123 Example St' };
+    var job = newJob('residential', 'house');
+    job.sample = true;
+    [1, 0, 2].forEach(function (k) { job.rooms.push(P.newRoom(P.ROOM_TYPES[k])); });
+    job.rooms[0].surfaces.ceiling = true;
+    job.notes = 'This is a sample quote. Edit anything, or delete it from the bottom of the job screen.';
+    saveJobs();
+    return job;
+  }
 
   // ---------- Home: all jobs ----------
   var HOME_FILTERS = [
@@ -150,7 +232,7 @@
       return '<a class="job-card" href="#/job/' + j.id + '">' +
         '<div class="job-main"><strong>' + esc(j.customer.name || 'New customer') + '</strong>' +
         '<div class="muted small">' + esc(j.customer.address || j.number) + ' · ' + fmtDate(j.updatedAt) + '</div>' +
-        '<div class="job-tags">' + statusPill(j) + (P.propertyLabel(j) ? '<span class="tag">' + esc(P.propertyLabel(j)) + '</span>' : '') + '</div></div>' +
+        '<div class="job-tags">' + (j.sample ? '<span class="pill">🧪 Sample</span>' : '') + statusPill(j) + (P.propertyLabel(j) ? '<span class="tag">' + esc(P.propertyLabel(j)) + '</span>' : '') + '</div></div>' +
         '<div class="job-right"><div class="job-total">' + money0(total) + '</div>' +
         (owed > 0 && (st === 'completed' || S.paidAmount(j) > 0) ? '<div class="owed">' + money0(owed) + ' owed</div>' : '') +
         (st === 'scheduled' && j.startDate ? '<div class="muted small">Starts ' + esc(fmtShort(j.startDate)) + '</div>' : '') +
@@ -1084,7 +1166,8 @@
       '<div class="actions"><button class="btn btn-primary" data-action="backup">⬇️ Back up now</button>' +
       '<label class="btn">⬆️ Restore<input type="file" accept=".json,application/json" id="restore-input" hidden></label></div>' +
       '<p class="muted small">' + jobs.length + ' jobs · ' + expenses.length + ' expenses saved.</p></section>' +
-      '<button class="link danger center" data-action="reset-settings">Reset prices to defaults</button>';
+      '<button class="link danger center" data-action="reset-settings">Reset prices to defaults</button>' +
+      '<p class="center-text muted small"><a href="#/welcome/1">Run setup again</a> · <a href="../privacy.html">Privacy Policy</a> · <a href="../terms.html">Terms</a></p>';
 
     var input = document.getElementById('logo-input');
     if (input) input.addEventListener('change', onLogo);
@@ -1106,7 +1189,7 @@
         canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
         settings.logo = canvas.toDataURL('image/png');
         saveSettings();
-        renderSettings();
+        route();
         toast('Logo saved');
       };
       img.src = reader.result;
@@ -1223,6 +1306,32 @@
     var i = el.dataset.i != null ? +el.dataset.i : null;
 
     switch (action) {
+      case 'wz-skip':
+        settings.onboarded = true; saveSettings();
+        location.hash = '#/';
+        return;
+      case 'wz-next':
+        if (el.dataset.v === '2' && !String(settings.businessName || '').trim()) {
+          toast('Add your business name to continue');
+          var bn = app.querySelector('[data-setting="businessName"]'); if (bn) bn.focus();
+          return;
+        }
+        location.hash = '#/welcome/' + el.dataset.v;
+        return;
+      case 'preset': {
+        var pr = RATE_PRESETS.find(function (x) { return x.id === el.dataset.v; });
+        if (pr) { settings.laborRate = pr.laborRate; settings.markup = pr.markup; settings.minimumJob = pr.minimumJob; saveSettings(); }
+        renderWelcome(2);
+        return;
+      }
+      case 'install':
+        if (installPrompt) { installPrompt.prompt(); installPrompt = null; renderWelcome(3); }
+        return;
+      case 'wz-finish':
+        settings.onboarded = true; saveSettings();
+        if (el.dataset.v === 'sample') { location.hash = '#/quote/' + createSampleJob().id; toast('Here\'s a sample. Tap ‹ Edit to change it'); }
+        else location.hash = '#/new';
+        return;
       case 'filter':
         homeFilter = el.dataset.v;
         renderHome();

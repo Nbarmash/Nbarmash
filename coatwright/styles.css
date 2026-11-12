@@ -346,6 +346,27 @@ select {
 .lines tfoot tr.strong td { font-weight: 700; }
 .topbar .icon-btn { width: 40px; font-size: 19px; }
 
+/* Welcome / onboarding */
+body[data-view="welcome"] .top-actions { display: none; }
+.welcome { max-width: 520px; margin: 0 auto; padding-bottom: 24px; }
+.wz-hero { text-align: center; padding: 24px 0 8px; }
+.wz-hero img { border-radius: 20px; box-shadow: 0 12px 30px rgba(31, 94, 255, .3); }
+.wz-hero h1 { font-size: 28px; letter-spacing: -.5px; margin: 18px 0 6px; }
+.wz-list { list-style: none; padding: 0; margin: 20px 0 24px; display: grid; gap: 10px; }
+.wz-list li { background: var(--card); border-radius: 14px; box-shadow: var(--shadow); padding: 14px 16px; display: grid; gap: 2px; }
+.wz-list span { color: var(--muted); font-size: 14px; }
+.wz-dots { display: flex; gap: 6px; justify-content: center; margin: 4px 0 6px; }
+.wz-dots span { width: 28px; height: 5px; border-radius: 99px; background: #dfe4ef; }
+.wz-dots span.on { background: var(--brand); }
+.welcome .ask { margin-bottom: 4px; }
+.welcome > .muted { margin: 0 4px 14px; }
+.wz-nav { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 16px; }
+.pick.picked { border-color: var(--brand); background: var(--brand-soft); }
+.pick.picked .chev { color: var(--brand); font-weight: 800; font-size: 22px; }
+.wz-check { width: 72px; height: 72px; margin: 0 auto; border-radius: 50%; background: #dcf3e2; color: var(--good); font-size: 38px; font-weight: 800; display: grid; place-items: center; }
+.welcome .btn.full, .welcome .btn-xl { margin-top: 10px; }
+.wz-tip { background: var(--brand-soft); border-radius: 12px; padding: 12px 14px; font-size: 14px; margin: 14px 0 0; }
+
 /* Toast */
 #toast {
   position: fixed; left: 50%; bottom: 110px; transform: translateX(-50%) translateY(20px);
