@@ -1,6 +1,6 @@
 // Offline support: always try the network first, fall back to the cached copy
 // (so the app still opens at a job site with no signal).
-var CACHE = 'coatwright-v3';
+var CACHE = 'coatwright-v4';
 var FILES = ['./', 'index.html', 'styles.css', 'pricing.js', 'stats.js', 'app.js', 'icon.svg', 'manifest.json'];
 
 self.addEventListener('install', function (e) {

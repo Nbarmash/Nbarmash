@@ -42,6 +42,8 @@
       'masking and full cleanup included. Any additional work will be quoted ' +
       'before it starts. Balance due on completion.',
     nextNumber: 1001,
+    invoiceDueDays: 7,    // 0 = due on receipt
+    paymentInstructions: '',
 
     // Exterior & floors
     extPaintPrice: 60,    // $ per gallon exterior paint

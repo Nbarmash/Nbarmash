@@ -99,3 +99,36 @@ test('CSV exports escape commas and quotes', () => {
   assert.ok(S.paymentsCsv([j]).includes('2026-01-02,Q-1,"Smith, ""Bob""",5,Cash'));
   assert.ok(S.expensesCsv([{ date: '2026-01-01', label: 'Gas', category: 'Gas & vehicle', amount: 40 }]).includes('Gas & vehicle'));
 });
+
+test('customers: same person across jobs is grouped by phone, email or name', () => {
+  const a = job({ customer: { name: 'Ann Lee', phone: '(555) 123-4567' }, updatedAt: 1, status: 'paid', payments: [{ date: '2026-01-01', amount: 100 }] });
+  const b = job({ customer: { name: 'Ann Lee-Smith', phone: '555.123.4567', address: '5 Oak' }, updatedAt: 2, status: 'sent' });
+  const c = job({ customer: { name: 'Bob', email: 'BOB@x.com' }, updatedAt: 3 });
+  const d = job({ customer: { name: 'bob', email: 'bob@x.com ' }, updatedAt: 0 });
+  const e = job({ customer: { name: '' } });
+  const list = S.customersFrom([a, b, c, d, e], settings);
+  assert.strictEqual(list.length, 2, 'empty customer is skipped');
+  assert.strictEqual(list[0].name, 'Bob');
+  assert.strictEqual(list[0].jobs.length, 2);
+  const ann = list[1];
+  assert.strictEqual(ann.jobs.length, 2);
+  assert.strictEqual(ann.name, 'Ann Lee-Smith', 'latest name wins');
+  assert.strictEqual(ann.address, '5 Oak');
+  assert.strictEqual(ann.collected, 100);
+  assert.strictEqual(ann.won, 1);
+  assert.strictEqual(S.customerKey({ name: '  Jane   DOE ' }), 'njane doe');
+});
+
+test('schedule: start/end dates from job length, late and unscheduled jobs', () => {
+  const j1 = job({ status: 'scheduled', startDate: '2026-06-10', actuals: { hours: 20 } }); // 3 days
+  const j2 = job({ status: 'won' }); // no date yet
+  const j3 = job({ status: 'scheduled', startDate: '2026-06-01', actuals: { hours: 4 } }); // ended in the past
+  const j4 = job({ status: 'sent', startDate: '2026-06-05' }); // not won: not on the calendar
+  const sch = S.schedule([j1, j2, j3, j4], settings, '2026-06-08');
+  assert.strictEqual(sch.items.length, 2);
+  assert.strictEqual(sch.items[0].job, j3);
+  assert.strictEqual(sch.items[0].late, true);
+  assert.strictEqual(sch.items[1].end, '2026-06-12');
+  assert.strictEqual(sch.items[1].days, 3);
+  assert.deepStrictEqual(sch.unscheduled, [j2]);
+});

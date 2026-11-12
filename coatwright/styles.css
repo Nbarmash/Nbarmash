@@ -332,6 +332,20 @@ select {
 .cat-list .tag { margin: 0; }
 .lines.expenses td .icon-btn.sm { width: 32px; height: 32px; font-size: 14px; margin-left: 4px; vertical-align: middle; }
 
+/* Schedule & customers */
+.sched-date { flex: none; width: 48px; text-align: center; border-radius: 10px; background: var(--brand-soft); color: var(--brand); padding: 6px 0; line-height: 1.1; }
+.sched-date b { display: block; font-size: 12px; text-transform: uppercase; }
+.sched-date span { font-size: 20px; font-weight: 800; }
+.job-card.sched { gap: 12px; }
+.job-card.sched .job-main { flex: 1; }
+.pill.late { background: #fff1d6; }
+.unsched { display: grid; grid-template-columns: 1fr 150px; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.unsched a { color: var(--text); text-decoration: none; min-width: 0; }
+.contact-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.contact-row .btn { flex: 1 1 auto; min-width: 0; padding: 0 12px; }
+.lines tfoot tr.strong td { font-weight: 700; }
+.topbar .icon-btn { width: 40px; font-size: 19px; }
+
 /* Toast */
 #toast {
   position: fixed; left: 50%; bottom: 110px; transform: translateX(-50%) translateY(20px);

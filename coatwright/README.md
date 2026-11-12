@@ -11,6 +11,7 @@ Price an interior paint job in minutes on your phone and send the customer a pro
    Pick Small / Medium / Large or type exact measurements, tap what's being painted
    (walls, ceiling, trim, doors), and choose coats and wall condition. The price updates as you go.
 3. **Track the job**: mark it Sent → Won → Scheduled → Completed → Paid, log payments and the real costs.
+   🧾 Turn a won job into an **invoice**, see upcoming work on the 📅 **schedule**, and every customer's history in 👥 **Customers**.
    📊 **Stats** shows what you made this year, money owed, win rate, monthly chart and insights.
    Export spreadsheets for your accountant and back up your data in ⚙️ Settings.
 4. **Review & Send**: email, text, save as PDF or copy the itemized quote.

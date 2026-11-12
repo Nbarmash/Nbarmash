@@ -48,7 +48,10 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ✅ Backup & restore so history is never lost; data stays private on the device
 - ✅ Merged to `main` (pull request #2) and live
 - ⬜ Compare with bidbrush.pro feature by feature (owner to send screenshots; site is blocked from Claude's environment)
-- ⬜ Ideas next: customer list with job history, job photos, calendar view, invoices, deposit links
+- ✅ Invoices from any won job: invoice number, due date, payments received, balance due, "how to pay"; email/text/PDF/copy
+- ✅ Schedule: won jobs by start date with job length in days, late flags, and quick date-picking for unscheduled jobs
+- ✅ Customers: auto-built from quotes (matched by phone/email/name), repeat-customer badge, what each paid you, job history, call/text/email/map, "new quote for this customer", name autofill
+- ⬜ Ideas next: job photos, deposit links (needs online payments, Phase 4)
 
 ## Phase 2 — Get it online and in painters' hands 🔄
 
@@ -134,3 +137,5 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - **2026-11-13** — Added exterior (house, deck, fence, doors, garage doors, shutters) and floors (garage floor with paint/epoxy/flake,
   basement, porch). Fixed a paint-total bug caught by the new tests. 25 tests passing; tested on a simulated iPhone.
 - **2026-11-13** — Merged pull request #2 (business tools, exterior, floors); GitHub Pages redeployed.
+- **2026-11-13** — Owner chose next: invoices/schedule/customers, cabinets & add-ons, landing page, video plan.
+  Built invoices, schedule and customers. 27 tests passing; tested on a simulated iPhone.
