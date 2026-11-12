@@ -3,7 +3,7 @@
 **Goal:** The go-to quoting app for up-and-coming painters. Enter the job details, get an
 itemized price, send it to the customer. Free to start, paid plan later.
 
-**Where we are now:** Phase 1 is built, plus job types, full commercial list and quick estimate. Renamed to **Coatwright** and merged into `main`. **Next: owner turns on GitHub Pages, then buys the domain and grabs the social handles.**
+**Where we are now:** Phase 1 is built, plus job types, full commercial list and quick estimate. **Coatwright is live** at https://nbarmash.github.io/Nbarmash/coatwright/ . **Next: install it on your phone and quote a test job.**
 
 Legend: ✅ done · 🔄 in progress · ⬜ not started
 
@@ -33,10 +33,10 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - ✅ Quick estimate from the total square footage (⚡ Quick / 📐 Room by room switch; quote says it's a ballpark)
 - ✅ Property type does not change pricing rules for now (owner: "everything else is good")
 
-## Phase 2 — Get it online and in painters' hands ⬜
+## Phase 2 — Get it online and in painters' hands 🔄
 
 - ✅ Merge the code into `main` (pull request #1)
-- 🔄 Turn on GitHub Pages so the app has a public link (owner: Settings → Pages → `main` → Save)
+- ✅ Turn on GitHub Pages: live at https://nbarmash.github.io/Nbarmash/coatwright/
 - ⬜ Install it on your own phone and quote a real (or pretend) job
 - ⬜ Check the default prices against real local numbers
 - ✅ Pick a final name: **Coatwright** (first pick BidBrush was taken)
@@ -85,6 +85,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 | 2026-11-13 | Commercial covers every business type with its own common areas | Owner: "include everything, big or small" |
 | 2026-11-13 | Drop the BidBrush name | Owner found bidbrush.pro; a painter estimating app called BrushBid also exists, so trademark and search confusion risk |
 | 2026-11-13 | Name: **Coatwright** | "Wright" = skilled craftsman; sounds established, made-up word so easier to trademark; no painting app or business found with it |
+| 2026-11-13 | Domain not required yet | Free github.io link is fine for testing; buy coatwright.com (~$10–20/yr) before marketing |
 | 2026-11-12 | Name: **BidBrush** (replaced) | Says what it does (bids) and who it's for (painters); short and works as a social handle |
 
 ## Log
@@ -105,3 +106,4 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started
 - **2026-11-13** — Checked ~20 replacement names (Quoter, Spackle, Hueprint, Tintwork and others were taken).
   Owner picked **Coatwright**. Renamed the app and folder (`coatwright/`). Added a small "Made with Coatwright" line to quotes.
 - **2026-11-13** — Name check for Coatwright came up clear. Merged pull request #1 into `main`.
+- **2026-11-13** — Owner turned on GitHub Pages. Deployment succeeded; the app is live.
