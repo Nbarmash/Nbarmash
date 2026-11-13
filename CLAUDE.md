@@ -3,7 +3,7 @@
 The root `README.md` is the owner's GitHub profile page: leave it alone.
 
 **Coatwright has moved** to the `coatwright/coatwright.github.io` repository
-(website https://coatwright.github.io/, app https://coatwright.github.io/app/).
+(website https://getcoatwright.com/, app https://getcoatwright.com/app/; repository coatwright/coatwright.github.io).
 All app code, the project tracker (`PROGRESS.md`) and marketing files live there now.
 Work on Coatwright in that repository, not here.
 
