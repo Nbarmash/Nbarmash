@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Coatwright has moved</title>
-  <link rel="canonical" href="https://coatwright.github.io/app/">
+  <link rel="canonical" href="https://getcoatwright.com/app/">
   <style>
     body { font: 17px/1.5 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f6fb; color: #16203a;
       max-width: 520px; margin: 0 auto; padding: 12vh 20px; text-align: center; }
@@ -20,7 +20,7 @@
 <body>
   <div class="card">
     <h1>Coatwright has moved</h1>
-    <p>Our new address is <b>coatwright.github.io/app</b>.</p>
+    <p>Our new address is <b>getcoatwright.com/app</b>.</p>
     <div id="has-data" hidden>
       <p>You have quotes saved at this old address. Bring them with you:</p>
       <ol>
@@ -29,11 +29,11 @@
       </ol>
       <button class="btn" id="backup">⬇️ Back up my data</button>
     </div>
-    <a class="btn primary" id="go" href="https://coatwright.github.io/app/">Go to the new Coatwright →</a>
+    <a class="btn primary" id="go" href="https://getcoatwright.com/app/">Go to the new Coatwright →</a>
   </div>
   <script>
     (function () {
-      var target = 'https://coatwright.github.io/app/' + location.hash;
+      var target = 'https://getcoatwright.com/app/' + location.hash;
       document.getElementById('go').href = target;
       function read(k, f) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch (e) { return f; } }
       var jobs = read('pq.jobs', []), expenses = read('pq.expenses', []), settings = read('pq.settings', {});
