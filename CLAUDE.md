@@ -1,14 +1,11 @@
 # Notes for Claude
 
-The Coatwright app lives in `coatwright/`. The public landing page is the root `index.html` (images in `landing/`). The root `README.md` is the owner's GitHub
-profile page: leave it alone.
+The root `README.md` is the owner's GitHub profile page: leave it alone.
 
-**Project tracking:** `coatwright/PROGRESS.md` is the step-by-step tracker. Read it at the
-start of every session. Whenever work is finished or a decision is made, update it in the
-same commit:
-- tick off steps (✅ done, 🔄 in progress, ⬜ not started)
-- update the "Where we are now" line
-- add any decision to "Decisions made"
-- add a dated entry to the "Log"
+**Coatwright has moved** to the `coatwright/coatwright.github.io` repository
+(website https://coatwright.github.io/, app https://coatwright.github.io/app/).
+All app code, the project tracker (`PROGRESS.md`) and marketing files live there now.
+Work on Coatwright in that repository, not here.
 
-Tests: `node --test coatwright/tests/pricing.test.js coatwright/tests/stats.test.js`
+This repository only keeps small pages that forward the old addresses
+(`index.html`, `privacy.html`, `terms.html`, `coatwright/`) to the new site.

@@ -2,34 +2,52 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Coatwright</title>
-  <meta name="description" content="Price a paint job in minutes and email the customer an itemized quote.">
-  <meta name="theme-color" content="#1f5eff">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icon.svg">
-  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coatwright has moved</title>
+  <link rel="canonical" href="https://coatwright.github.io/app/">
+  <style>
+    body { font: 17px/1.5 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f6fb; color: #16203a;
+      max-width: 520px; margin: 0 auto; padding: 12vh 20px; text-align: center; }
+    .card { background: #fff; border-radius: 18px; padding: 28px 22px; box-shadow: 0 4px 20px rgba(22,32,58,.08); }
+    h1 { font-size: 26px; margin: 0 0 8px; }
+    p { color: #4a5470; }
+    .btn { display: block; width: 100%; min-height: 52px; margin-top: 12px; border-radius: 14px; border: 1px solid #e3e7f0;
+      background: #fff; color: #16203a; font: 600 17px/52px inherit; text-decoration: none; cursor: pointer; }
+    .btn.primary { background: #1f5eff; border-color: #1f5eff; color: #fff; }
+    ol { text-align: left; color: #4a5470; padding-left: 22px; }
+  </style>
 </head>
 <body>
-  <header class="topbar no-print">
-    <a href="#/" class="brand"><img src="icon.svg" alt="" width="28" height="28"> Coatwright</a>
-    <nav class="top-actions">
-      <a href="#/schedule" class="icon-btn" aria-label="Schedule">📅</a>
-      <a href="#/customers" class="icon-btn" aria-label="Customers">👥</a>
-      <a href="#/stats" class="icon-btn" aria-label="Business stats">📊</a>
-      <a href="#/settings" class="icon-btn" aria-label="Settings">⚙️</a>
-    </nav>
-  </header>
-  <main id="app"></main>
-  <div id="toast" role="status" aria-live="polite"></div>
-  <script src="pricing.js"></script>
-  <script src="stats.js"></script>
-  <script src="app.js"></script>
+  <div class="card">
+    <h1>Coatwright has moved</h1>
+    <p>Our new address is <b>coatwright.github.io/app</b>.</p>
+    <div id="has-data" hidden>
+      <p>You have quotes saved at this old address. Bring them with you:</p>
+      <ol>
+        <li>Tap <b>Back up my data</b> and save the file.</li>
+        <li>Open the new address, go to ⚙️ Settings → <b>Restore</b>, and pick that file.</li>
+      </ol>
+      <button class="btn" id="backup">⬇️ Back up my data</button>
+    </div>
+    <a class="btn primary" id="go" href="https://coatwright.github.io/app/">Go to the new Coatwright →</a>
+  </div>
   <script>
-    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-      navigator.serviceWorker.register('sw.js').catch(function () {});
-    }
+    (function () {
+      var target = 'https://coatwright.github.io/app/' + location.hash;
+      document.getElementById('go').href = target;
+      function read(k, f) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch (e) { return f; } }
+      var jobs = read('pq.jobs', []), expenses = read('pq.expenses', []), settings = read('pq.settings', {});
+      if (!jobs.length && !expenses.length) { location.replace(target); return; }
+      document.getElementById('has-data').hidden = false;
+      document.getElementById('backup').onclick = function () {
+        var data = JSON.stringify({ app: 'Coatwright', version: 1, exportedAt: new Date().toISOString(),
+          settings: settings, jobs: jobs, expenses: expenses }, null, 1);
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+        a.download = 'coatwright-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+        document.body.appendChild(a); a.click();
+      };
+    })();
   </script>
 </body>
 </html>
